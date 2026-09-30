@@ -1,11 +1,13 @@
 :root {
-  --ink: #1c3d34;
-  --ink-deep: #12261f;
-  --paper: #f3f0ea;
-  --card: #fffcf8;
-  --line: #e4ddd2;
-  --muted: #6f675e;
-  --text: #1c1917;
+  --ink: #326f63;
+  --ink-deep: #D6D8FF;
+  --paper: #ffffff;
+  --card: #ffffff;
+  --line: #d5e7e4;
+  --muted: #627875;
+  --text: #203431;
+  --blue-soft: #D6D8FF;
+  --sage: #DDFCAE;
   --sale: #a33b32;
   --serif: "Fraunces", Georgia, serif;
   --sans: "Outfit", "Segoe UI", sans-serif;
@@ -19,13 +21,13 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 520; margin: 0; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 .desk { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
-.side { background: var(--ink-deep); color: #efe8dc; padding: 18px 12px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+.side { background: var(--blue-soft); color: var(--text); padding: 18px 12px; position: sticky; top: 0; height: 100vh; overflow: auto; border-right: 1px solid var(--line); }
 .brand { padding: 6px 10px 16px; }
-.brand strong { font-family: var(--serif); letter-spacing: 0.12em; font-size: 22px; display: block; }
-.brand small { letter-spacing: 0.16em; font-size: 10px; color: #c9bfb0; }
-.side a, .side button.nav { display: block; width: 100%; text-align: left; background: none; border: 0; color: #e7dfd2; padding: 8px 10px; border-radius: 8px; margin: 1px 0; }
-.side a.active { background: rgba(255,255,255,.1); color: white; }
-.side .group { margin: 14px 10px 6px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #b5aa9c; }
+.brand strong { font-family: var(--serif); letter-spacing: 0; font-size: 19px; display: block; }
+.brand small { letter-spacing: 0.16em; font-size: 10px; color: var(--muted); }
+.side a, .side button.nav { display: block; width: 100%; text-align: left; background: none; border: 0; color: var(--text); padding: 8px 10px; border-radius: 8px; margin: 1px 0; }
+.side a.active, .side a:hover { background: var(--sage); color: var(--ink); }
+.side .group { margin: 14px 10px 6px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .main { min-width: 0; }
 .top { display: flex; gap: 12px; align-items: center; padding: 14px 20px; background: var(--card); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
 .top input { flex: 1; height: 40px; border-radius: 999px; border: 1px solid var(--line); padding: 0 14px; background: white; }
@@ -50,8 +52,8 @@ th { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: 
 .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
 .field textarea { height: auto; padding: 8px 10px; }
 .field span { font-size: 12px; color: var(--muted); }
-.status { border-radius: 999px; padding: 2px 8px; background: #f3eee6; font-size: 12px; text-transform: capitalize; }
-.status.published, .status.approved, .status.active, .status.delivered, .status.paid, .status.in_stock { background: #e5f0e6; }
+.status { border-radius: 999px; padding: 2px 8px; background: var(--blue-soft); font-size: 12px; text-transform: capitalize; }
+.status.published, .status.approved, .status.active, .status.delivered, .status.paid, .status.in_stock { background: var(--sage); }
 .status.pending, .status.placed, .status.low_stock, .status.draft { background: #f8efd8; }
 .status.cancelled, .status.rejected, .status.blocked, .status.out_of_stock, .status.inactive { background: #f8e4e1; }
 .modal { position: fixed; inset: 0; background: rgba(18, 24, 20, .45); display: grid; place-items: center; z-index: 20; padding: 16px; }

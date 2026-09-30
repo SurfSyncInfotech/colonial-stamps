@@ -28,7 +28,7 @@ app.use('/uploads', express.static(path.resolve(env.uploadDir)));
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 50, message: { success: false, message: 'Too many requests' } });
 
 app.get('/api/health', (_req, res) => {
-  res.json({ success: true, service: 'FOLIO Stamp House API', version: '1.0.0' });
+  res.json({ success: true, service: 'Stamps Stamp House API', version: '1.0.0' });
 });
 
 app.use('/api/auth', authLimiter, customerAuthRoutes);
@@ -41,7 +41,7 @@ app.use('/api/admin', adminRoutes);
 app.use(errorHandler);
 
 app.listen(env.port, () => {
-  console.log(`FOLIO Stamp House API running on http://localhost:${env.port}`);
+  console.log(`Stamps Stamp House API running on http://localhost:${env.port}`);
   if (!env.db.user) {
     console.warn('WARNING: DB_USER not set in .env — set MySQL credentials and run npm run migrate && npm run seed');
   }

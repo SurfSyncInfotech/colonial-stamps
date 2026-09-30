@@ -220,11 +220,11 @@ router.get('/analytics/export', requirePermission('analytics.view'), asyncHandle
   );
   if (req.query.format === 'xls') {
     res.setHeader('Content-Type', 'application/vnd.ms-excel');
-    res.setHeader('Content-Disposition', 'attachment; filename="folio-sales.xls"');
-    return res.send(toExcelHtml(rows, 'Folio sales'));
+    res.setHeader('Content-Disposition', 'attachment; filename="stamps-sales.xls"');
+    return res.send(toExcelHtml(rows, 'Stamps sales'));
   }
   res.setHeader('Content-Type', 'text/csv');
-  res.setHeader('Content-Disposition', 'attachment; filename="folio-sales.csv"');
+  res.setHeader('Content-Disposition', 'attachment; filename="stamps-sales.csv"');
   res.send(toCsv(rows));
 }));
 
@@ -705,7 +705,7 @@ router.get('/orders/:id/invoice', requirePermission('orders.view'), asyncHandler
   const address = typeof orders[0].shipping_address === 'string' ? JSON.parse(orders[0].shipping_address) : orders[0].shipping_address;
   const rows = items.map((item) => `<tr><td>${item.product_name}</td><td>${item.quantity}</td><td>${item.unit_price}</td><td>${item.line_total}</td></tr>`).join('');
   res.send(`<!doctype html><html><head><meta charset="utf-8"><title>${orders[0].order_number}</title></head><body style="font-family:Georgia,serif;padding:32px">
-    <h1>FOLIO · ${orders[0].order_number}</h1><p>${address.full_name}, ${address.city}</p>
+    <h1>Stamps · ${orders[0].order_number}</h1><p>${address.full_name}, ${address.city}</p>
     <table width="100%" cellpadding="8">${rows}</table><p>Total ₹${orders[0].grand_total}</p><script>window.print()</script></body></html>`);
 }));
 
@@ -748,7 +748,7 @@ router.put('/customers/:id/status', requirePermission('customers.approve'), asyn
     [body.status, body.reason || null, body.status, req.params.id]
   );
   const copy = {
-    approved: ['Account approved', 'You can place orders with Folio.'],
+    approved: ['Account approved', 'You can place orders with Stamps.'],
     rejected: ['Account not approved', body.reason || 'The desk could not approve this account.'],
     blocked: ['Account blocked', 'Ordering has been paused on this account.'],
     pending: ['Account under review', 'The desk is still reading your account.'],

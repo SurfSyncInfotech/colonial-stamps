@@ -37,7 +37,7 @@ export function Login() {
     <Layout title="Sign In">
       <div className="container" style={{ maxWidth: 440, padding: '48px 24px' }}>
         <h1 className="section-title" style={{ textAlign: 'center' }}>Welcome Back</h1>
-        <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: 32 }}>Sign in to your FOLIO account</p>
+        <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: 32 }}>Sign in to your Stamps account</p>
         <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
           <button className={`btn ${mode === 'password' ? 'btn-primary' : 'btn-outline'}`} style={{ flex: 1 }} onClick={() => { setMode('password'); setOtpSent(false); }}>Password</button>
           <button className={`btn ${mode === 'otp' ? 'btn-primary' : 'btn-outline'}`} style={{ flex: 1 }} onClick={() => setMode('otp')}>OTP</button>
@@ -101,7 +101,7 @@ export function Signup() {
   return (
     <Layout title="Create Account">
       <div className="container" style={{ maxWidth: 440, padding: '48px 24px' }}>
-        <h1 className="section-title" style={{ textAlign: 'center' }}>Join FOLIO</h1>
+        <h1 className="section-title" style={{ textAlign: 'center' }}>Join Stamps</h1>
         {step === 'form' ? (
           <form onSubmit={handleSignup}>
             <div className="form-group"><label>Full Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>

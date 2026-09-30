@@ -63,7 +63,7 @@ export default function Checkout() {
         <div className="container section" style={{ textAlign: 'center' }}>
           <h1 className="section-title">Thank You!</h1>
           <p>Order <strong>{orderResult.orderNumber}</strong> confirmed.</p>
-          <p>Total: ₹{orderResult.total.toLocaleString('en-IN')}</p>
+          <p>Total: ₹</p>
           <button className="btn btn-primary" style={{ marginTop: 24 }} onClick={() => navigate('/account/orders')}>View Orders</button>
         </div>
       </Layout>
@@ -100,7 +100,7 @@ export default function Checkout() {
             {shipping.map((s) => (
               <label key={s.id} style={{ display: 'block', padding: 16, border: '1px solid var(--border)', marginBottom: 8, cursor: 'pointer' }}>
                 <input type="radio" name="ship" checked={selectedShip === s.id} onChange={() => setSelectedShip(s.id)} style={{ marginRight: 8 }} />
-                <strong>{s.name}</strong> — ₹{s.base_rate} · {s.estimated_days_min}-{s.estimated_days_max} days
+                <strong>{s.name}</strong> — ₹ · {s.estimated_days_min}-{s.estimated_days_max} days
               </label>
             ))}
           </div>
@@ -123,12 +123,12 @@ export default function Checkout() {
         {step === 3 && (
           <div className="cart-summary" style={{ maxWidth: 480 }}>
             <h3 style={{ fontFamily: 'var(--serif)', marginBottom: 16 }}>Review Order</h3>
-            {cart?.items?.map((i) => <div key={i.id} className="row"><span>{i.name} × {i.quantity}</span><span>₹{i.lineTotal.toLocaleString('en-IN')}</span></div>)}
-            <div className="row"><span>Subtotal</span><span>₹{cart?.subtotal?.toLocaleString('en-IN')}</span></div>
-            {cart?.discountAmount > 0 && <div className="row"><span>Discount</span><span>-₹{cart.discountAmount.toLocaleString('en-IN')}</span></div>}
-            <div className="row"><span>GST</span><span>₹{cart?.taxAmount?.toLocaleString('en-IN')}</span></div>
-            {estimate && <div className="row"><span>Shipping</span><span>₹{estimate.shippingAmount.toLocaleString('en-IN')}</span></div>}
-            <div className="row total"><span>Total</span><span>₹{total.toLocaleString('en-IN')}</span></div>
+            {cart?.items?.map((i) => <div key={i.id} className="row"><span>{i.name} × {i.quantity}</span><span>₹</span></div>)}
+            <div className="row"><span>Subtotal</span><span>₹</span></div>
+            {cart?.discountAmount > 0 && <div className="row"><span>Discount</span><span>₹</span></div>}
+            <div className="row"><span>GST</span><span>₹</span></div>
+            {estimate && <div className="row"><span>Shipping</span><span>₹</span></div>}
+            <div className="row total"><span>Total</span><span>₹</span></div>
           </div>
         )}
 

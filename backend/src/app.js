@@ -27,12 +27,29 @@ export function createApp() {
     message: { message: 'Too many attempts. Wait a few minutes and try again.' },
   });
 
-  app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'folio' }));
+  app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'stamps' }));
   app.use('/api/auth', authLimit, authRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api', catalogRoutes);
   app.use('/api', shopRoutes);
-  app.use((req, res) => res.status(404).json({ message: `No route for ${req.method} ${req.path}` }));
+
+  // Serve production customer frontend if dist exists
+  import('path').then((path) => {
+    import('url').then(({ fileURLToPath }) => {
+      const __dirname = path.default.dirname(fileURLToPath(import.meta.url));
+      const distPath = path.default.resolve(__dirname, '../../customer/dist');
+      app.use(express.static(distPath));
+      app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+          return res.status(404).json({ message: `No route for ${req.method} ${req.path}` });
+        }
+        res.sendFile(path.default.join(distPath, 'index.html'), (err) => {
+          if (err) next();
+        });
+      });
+    });
+  });
+
   app.use(errorHandler);
   return app;
 }

@@ -117,7 +117,8 @@ router.put('/cart/items/:id', asyncHandler(async (req, res) => {
 
 router.delete('/cart/items/:id', asyncHandler(async (req, res) => {
   await query(
-    `DELETE ci FROM cart_items ci JOIN carts c ON c.id = ci.cart_id WHERE ci.id = ? AND c.user_id = ?`,
+    `DELETE FROM cart_items
+     WHERE id = ? AND cart_id IN (SELECT id FROM carts WHERE user_id = ?)`,
     [req.params.id, req.user.id]
   );
   res.json({ message: 'Removed from cart.', ...(await loadCart(req.user.id)) });
@@ -159,9 +160,9 @@ router.post('/wishlist/items', asyncHandler(async (req, res) => {
 
 router.delete('/wishlist/items/:productId', asyncHandler(async (req, res) => {
   await query(
-    `DELETE wi FROM wishlist_items wi JOIN wishlists w ON w.id = wi.wishlist_id
-     WHERE w.user_id = ? AND wi.product_id = ?`,
-    [req.user.id, req.params.productId]
+    `DELETE FROM wishlist_items
+     WHERE product_id = ? AND wishlist_id IN (SELECT id FROM wishlists WHERE user_id = ?)`,
+    [req.params.productId, req.user.id]
   );
   await query('UPDATE products SET wishlist_count = (SELECT COUNT(*) FROM wishlist_items WHERE product_id = ?) WHERE id = ?', [req.params.productId, req.params.productId]);
   res.json({ message: 'Removed from wishlist.' });
@@ -184,7 +185,11 @@ router.post('/wishlist/items/:productId/move', asyncHandler(async (req, res) => 
   } else {
     await query('INSERT INTO cart_items (cart_id, product_id, quantity) VALUES (?, ?, 1)', [cartId, productId]);
   }
-  await query(`DELETE wi FROM wishlist_items wi JOIN wishlists w ON w.id = wi.wishlist_id WHERE w.user_id = ? AND wi.product_id = ?`, [req.user.id, productId]);
+  await query(
+    `DELETE FROM wishlist_items
+     WHERE product_id = ? AND wishlist_id IN (SELECT id FROM wishlists WHERE user_id = ?)`,
+    [productId, req.user.id]
+  );
   res.json({ message: 'Moved to cart.' });
 }));
 
@@ -588,7 +593,7 @@ function invoiceHtml(order, items) {
     .totals{margin-left:auto;width:280px;margin-top:16px}
     .totals div{display:flex;justify-content:space-between;padding:4px 0;font-family:Arial,sans-serif;font-size:13px}
   </style></head><body>
-  <h1>FOLIO</h1>
+  <h1>Stamps</h1>
   <p>Stamp House · Invoice ${order.order_number}</p>
   <p>${new Date(order.created_at).toLocaleString('en-IN')}<br>
   ${address.full_name}<br>${address.address_line}${address.apartment ? ', ' + address.apartment : ''}<br>

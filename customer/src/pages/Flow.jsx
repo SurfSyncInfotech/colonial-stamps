@@ -37,7 +37,7 @@ export function CartPage() {
                 <img src={item.image} alt="" />
                 <div>
                   <Link to={`/product/${item.slug}`}><strong>{item.name}</strong></Link>
-                  <p>{item.available < 1 ? 'Out of stock' : item.quantity > item.available ? `Only ${item.available} remain` : `${inr(item.effective_price)} each`}</p>
+                  <p>{item.available < 1 ? 'Out of stock' : item.quantity > item.available ? `Only ${item.available} remain` : '₹'}</p>
                   <div className="qty">
                     <button aria-label="Decrease" onClick={() => update(item.cart_item_id, item.quantity - 1)} disabled={item.quantity <= 1}>−</button>
                     <span>{item.quantity}</span>
@@ -231,7 +231,7 @@ export function CheckoutPage() {
           <div className="sum-row"><span>Subtotal</span><span>{inr(quote?.subtotal || 0)}</span></div>
           <div className="sum-row"><span>Discount</span><span>{inr(quote?.discount || 0)}</span></div>
           <div className="sum-row"><span>Shipping</span><span>{inr(quote?.shipping || 0)}</span></div>
-          <div className="sum-row"><span>GST {quote?.gst_percent || 0}%</span><span>{inr(quote?.tax || 0)}</span></div>
+          <div className="sum-row"><span>GST</span><span>{inr(quote?.tax || 0)}</span></div>
           <div className="sum-row"><strong>Total</strong><strong>{inr(quote?.grand || 0)}</strong></div>
           {quote?.problems?.map((problem) => <p key={problem} className="error">{problem}</p>)}
         </aside>
@@ -286,7 +286,7 @@ export function LoginPage() {
         <button className="btn" type="submit">{mode === 'password' ? 'Sign in' : 'Send code'}</button>
         <p style={{ marginTop: 12 }}><button type="button" className="btn ghost" onClick={() => setMode(mode === 'password' ? 'otp' : 'password')}>{mode === 'password' ? 'Use a one-time code' : 'Use a password'}</button></p>
         <p>New here? <Link to="/signup">Create an account</Link></p>
-        <p className="note">Sample accounts: meera.iyer@folio.test / Customer@12345. Development OTP is 123456.</p>
+        <p className="note">Development OTP is 123456.</p>
       </form>
     </div>
   );

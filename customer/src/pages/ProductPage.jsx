@@ -62,9 +62,7 @@ export default function ProductPage() {
             <h1>{product.name}</h1>
             <p style={{ color: 'var(--text-muted)' }}>{product.short_description}</p>
             <div className="pdp-price">
-              ₹{Number(product.price).toLocaleString('en-IN')}
-              {discount && <span className="discount-badge" style={{ marginLeft: 12, position: 'static' }}>-{discount}%</span>}
-              {product.compare_at_price && <span className="compare">₹{Number(product.compare_at_price).toLocaleString('en-IN')}</span>}
+              ₹
             </div>
             <p style={{ fontSize: '0.85rem', color: product.stock > 0 ? 'var(--forest)' : 'var(--sale)' }}>
               {product.stock > 0 ? `${product.stock - product.reserved_stock} in stock` : 'Out of stock'}

@@ -21,6 +21,10 @@ router.get('/home', asyncHandler(async (_req, res) => {
     `SELECT c.*, (SELECT COUNT(*) FROM products p WHERE p.category_id = c.id AND p.status = 'published' AND p.deleted_at IS NULL) AS product_count
      FROM categories c WHERE c.status = 'active' ORDER BY c.display_order, c.name`
   );
+  const allSubs = await query(
+    `SELECT s.*, (SELECT COUNT(*) FROM products p WHERE p.subcategory_id = s.id AND p.status = 'published' AND p.deleted_at IS NULL) AS product_count
+     FROM subcategories s WHERE s.status = 'active' ORDER BY s.display_order, s.name`
+  );
   const sections = await query(`SELECT * FROM homepage_sections ORDER BY display_order`);
   async function picks(where, order, limit = 8) {
     const rows = await query(
@@ -37,11 +41,15 @@ router.get('/home', asyncHandler(async (_req, res) => {
   );
   res.json({
     banners,
-    categories: categories.map((c) => ({ ...c, bullet_points: parseBullets(c.bullet_points) })),
+    categories: categories.map((c) => ({
+      ...c,
+      bullet_points: parseBullets(c.bullet_points),
+      subcategories: allSubs.filter((s) => s.category_id === c.id).map((s) => ({ ...s, bullet_points: parseBullets(s.bullet_points) })),
+    })),
     sections,
     featured: await picks('AND p.is_featured = 1', 'p.sold_count DESC, p.created_at DESC'),
     new_arrivals: await picks('AND p.is_new_arrival = 1', 'p.created_at DESC'),
-    best_sellers: await picks('AND p.sold_count > 0', 'p.sold_count DESC, p.view_count DESC'),
+    best_sellers: await picks('AND (p.sold_count > 0 OR p.is_featured = 1)', 'p.sold_count DESC, p.created_at DESC'),
     rare: await picks(`AND p.rarity IN ('Rare','Very rare','Unique')`, 'p.price DESC', 4),
     reviews,
   });
@@ -54,7 +62,17 @@ router.get('/categories', asyncHandler(async (_req, res) => {
       (SELECT COUNT(*) FROM products p WHERE p.category_id = c.id AND p.status = 'published' AND p.deleted_at IS NULL) AS product_count
      FROM categories c WHERE c.status = 'active' ORDER BY display_order, name`
   );
-  res.json({ data: rows.map((c) => ({ ...c, bullet_points: parseBullets(c.bullet_points) })) });
+  const subs = await query(
+    `SELECT s.*, (SELECT COUNT(*) FROM products p WHERE p.subcategory_id = s.id AND p.status = 'published' AND p.deleted_at IS NULL) AS product_count
+     FROM subcategories s WHERE s.status = 'active' ORDER BY display_order, name`
+  );
+  res.json({
+    data: rows.map((c) => ({
+      ...c,
+      bullet_points: parseBullets(c.bullet_points),
+      subcategories: subs.filter((s) => s.category_id === c.id).map((s) => ({ ...s, bullet_points: parseBullets(s.bullet_points) })),
+    })),
+  });
 }));
 
 router.get('/categories/:slug', asyncHandler(async (req, res) => {

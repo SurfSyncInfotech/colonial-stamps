@@ -14,7 +14,7 @@ async function start() {
     process.exit(1);
   }
   app.listen(config.port, () => {
-    logger('info', `Folio API listening on http://localhost:${config.port}`);
+    logger('info', `Stamps API listening on http://localhost:${config.port}`);
   });
 }
 

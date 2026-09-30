@@ -46,7 +46,7 @@ export function Shell() {
   return (
     <div className="desk">
       <aside className={`side ${open ? 'open' : ''}`}>
-        <div className="brand"><strong>FOLIO</strong><small>DESK</small></div>
+        <div className="brand"><strong>Stamps from everywhere</strong><small>ADMIN DESK</small></div>
         {nav.map(([group, links]) => (
           <div key={group}>
             <div className="group">{group}</div>

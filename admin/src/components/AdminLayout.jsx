@@ -45,7 +45,7 @@ export default function AdminLayout({ children, title }) {
   return (
     <div className="admin-shell">
       <aside className="sidebar">
-        <div className="sidebar-brand">FOLIO<small>Admin Panel</small></div>
+        <div className="sidebar-brand">Stamps<small>Admin Panel</small></div>
         <nav className="sidebar-nav">
           {NAV.map((group) => (
             <div key={group.section}>

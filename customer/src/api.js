@@ -1,10 +1,5 @@
 export function inr(value) {
-  const amount = Number(value || 0);
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
-  }).format(amount);
+  return '₹';
 }
 
 export function discountOf(price, sale) {

@@ -35,7 +35,7 @@ function useLoad(path) {
 export function LoginPage() {
   const { persist } = useDesk();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: 'admin@folio.test', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   async function submit(event) {
     event.preventDefault();
@@ -47,8 +47,8 @@ export function LoginPage() {
   }
   return (
     <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-      <div style={{ background: '#12261f', color: '#f6f1e7', padding: 48, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-        <strong style={{ fontFamily: 'var(--serif)', letterSpacing: '0.14em', fontSize: 28 }}>FOLIO</strong>
+      <div style={{ background: 'var(--blue-soft)', color: 'var(--text)', padding: 48, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+        <strong style={{ fontFamily: 'var(--serif)', fontSize: 28 }}>Stamps from everywhere</strong>
         <h1 style={{ fontSize: 52, maxWidth: '10ch' }}>The desk, not a dashboard costume.</h1>
       </div>
       <form onSubmit={submit} style={{ maxWidth: 420, margin: 'auto', padding: 24 }}>
@@ -57,7 +57,7 @@ export function LoginPage() {
         <label className="field"><span>Password</span><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></label>
         <Banner error={error} />
         <button className="btn" type="submit">Enter</button>
-        <p className="note" style={{ marginTop: 12 }}>Sample desk: admin@folio.test / Admin@12345</p>
+        <p className="note" style={{ marginTop: 12 }}>Enter the administrator credentials configured for this store.</p>
       </form>
     </div>
   );
@@ -131,8 +131,8 @@ export function AnalyticsPage() {
           <select aria-label="Range" value={range} onChange={(e) => setRange(e.target.value)}>
             <option value="daily">Today</option><option value="weekly">Week</option><option value="monthly">Month</option><option value="yearly">Year</option>
           </select>
-          <button className="btn light" style={{ marginLeft: 8 }} onClick={() => download(`/api/admin/analytics/export?format=csv&range=${range}`, 'folio-sales.csv')}>CSV</button>
-          <button className="btn light" style={{ marginLeft: 8 }} onClick={() => download(`/api/admin/analytics/export?format=xls&range=${range}`, 'folio-sales.xls')}>Excel</button>
+          <button className="btn light" style={{ marginLeft: 8 }} onClick={() => download(`/api/admin/analytics/export?format=csv&range=${range}`, 'stamps-sales.csv')}>CSV</button>
+          <button className="btn light" style={{ marginLeft: 8 }} onClick={() => download(`/api/admin/analytics/export?format=xls&range=${range}`, 'stamps-sales.xls')}>Excel</button>
         </div>
       </div>
       <div className="metrics">

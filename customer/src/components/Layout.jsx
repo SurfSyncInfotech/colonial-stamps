@@ -14,7 +14,7 @@ export default function Layout({ children, title, description }) {
     if (search.trim()) navigate(`/search?q=${encodeURIComponent(search.trim())}`);
   };
 
-  if (title) document.title = `${title} — FOLIO Stamp House`;
+  if (title) document.title = `${title} — Stamps Stamp House`;
   if (description) {
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
@@ -26,7 +26,7 @@ export default function Layout({ children, title, description }) {
       <div className="utility-bar">Free insured shipping on orders above ₹5,000 · Authenticated stamps guaranteed</div>
       <header className="site-header">
         <div className="container header-inner">
-          <Link to="/" className="logo">FOLIO<span>Stamp House</span></Link>
+          <Link to="/" className="logo">Stamps<span>Stamp House</span></Link>
           <nav className="nav-links">
             <Link to="/stamps">Shop</Link>
             <Link to="/stamps/british-commonwealth">Commonwealth</Link>
@@ -67,7 +67,7 @@ export default function Layout({ children, title, description }) {
         <div className="container">
           <div className="footer-grid">
             <div>
-              <h4>FOLIO Stamp House</h4>
+              <h4>Stamps Stamp House</h4>
               <p>Premium physical postage &amp; collector stamps since 1987.</p>
             </div>
             <div>
@@ -98,7 +98,7 @@ export default function Layout({ children, title, description }) {
               )}
             </div>
           </div>
-          <div className="footer-bottom">&copy; {new Date().getFullYear()} FOLIO Stamp House. All rights reserved.</div>
+          <div className="footer-bottom">&copy; {new Date().getFullYear()} Stamps Stamp House. All rights reserved.</div>
         </div>
       </footer>
     </>

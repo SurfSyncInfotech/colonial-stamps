@@ -100,7 +100,7 @@ export default function ProductPage() {
           <div className="kicker">{product.category_name} · {product.subcategory_name}</div>
           <h1>{product.name}</h1>
           <Stars value={product.rating} />
-          <div className="price-lg">{inr(product.effective_price)} {off > 0 && <s>{inr(product.price)}</s>} {off > 0 && <span className="off">-{off}%</span>}</div>
+          <div className="price-lg">₹</div>
           <p>{product.available <= 0 ? 'Out of stock' : product.availability === 'low_stock' ? `Only ${product.available} left in the cabinet` : `${product.available} available`}</p>
           <p style={{ margin: '12px 0' }}>{product.short_description}</p>
           <div className="meta-grid">

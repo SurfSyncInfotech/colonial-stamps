@@ -16,6 +16,6 @@ export function generateStampSvg({ name, country, year, color = '#1c3d32', accen
   <text x="100" y="155" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="${color}">${country || 'WORLD'}</text>
   <text x="100" y="175" text-anchor="middle" font-family="Georgia,serif" font-size="18" font-weight="bold" fill="${accent}">${yearText}</text>
   <line x1="30" y1="190" x2="170" y2="190" stroke="${color}" stroke-width="0.5" opacity="0.4"/>
-  <text x="100" y="210" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="${color}" opacity="0.7">FOLIO STAMP HOUSE</text>
+  <text x="100" y="210" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="${color}" opacity="0.7">STAMPS STAMP HOUSE</text>
 </svg>`;
 }

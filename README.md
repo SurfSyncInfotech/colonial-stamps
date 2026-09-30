@@ -1,4 +1,4 @@
-# Folio Stamp House
+# Stamps Stamp House
 
 Customer shop, admin desk, and one API. No Docker.
 

@@ -60,9 +60,7 @@ export default function ProductDetail() {
             <h1>{product.name}</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{product.stamp_country} · {product.stamp_year} · {product.stamp_condition?.replace('_', ' ')}</p>
             <div className="pdp-price">
-              ₹{Number(product.price).toLocaleString('en-IN')}
-              {product.compare_at_price && <span className="compare">₹{Number(product.compare_at_price).toLocaleString('en-IN')}</span>}
-              {discount && <span className="discount-badge" style={{ marginLeft: 12, position: 'static' }}>-{discount}%</span>}
+              ₹
             </div>
             <p style={{ marginBottom: 16 }}>{product.short_description}</p>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>

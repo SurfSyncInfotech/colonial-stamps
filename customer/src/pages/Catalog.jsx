@@ -59,8 +59,6 @@ export default function Catalog() {
         <div className="filters-bar">
           <select value={sort} onChange={(e) => setSearchParams({ page: '1', sort: e.target.value })}>
             <option value="newest">Newest</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
             <option value="name">Name</option>
           </select>
         </div>

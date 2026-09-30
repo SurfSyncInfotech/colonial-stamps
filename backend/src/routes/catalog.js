@@ -159,7 +159,7 @@ router.get('/settings/public', async (_req, res, next) => {
       success: true,
       data: {
         customerApprovalRequired: approval?.setting_value === 'true' || approval?.setting_value === true,
-        brandName: 'FOLIO Stamp House',
+        brandName: 'Stamps Stamp House',
         gstRate: 0.18,
       },
     });

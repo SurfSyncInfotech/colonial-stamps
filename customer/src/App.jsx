@@ -24,6 +24,11 @@ export default function App() {
           <Route path="signup" element={<SignupPage />} />
           <Route path="verify" element={<VerifyPage />} />
           <Route path="track" element={<TrackPage />} />
+          <Route path="about" element={<Navigate to="/pages/about-us" replace />} />
+          <Route path="contact" element={<Navigate to="/pages/contact" replace />} />
+          <Route path="contacts" element={<Navigate to="/pages/contact" replace />} />
+          <Route path="product" element={<Navigate to="/stamps" replace />} />
+          <Route path="products" element={<Navigate to="/stamps" replace />} />
           <Route path="pages/:slug" element={<CmsPage />} />
           <Route path="account" element={<AccountLayout />}>
             <Route index element={<ProfilePage />} />

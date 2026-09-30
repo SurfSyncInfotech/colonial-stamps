@@ -150,7 +150,7 @@ export function OrderDetailPage() {
       <p>{new Date(order.created_at).toLocaleString('en-IN')}</p>
       <p><span className={`status ${order.status}`}>{order.status.replaceAll('_', ' ')}</span> <span className={`status ${order.payment_status}`}>{order.payment_status}</span></p>
       {items.map((item) => (
-        <div className="line" key={item.id}><img src={item.image} alt="" /><div><strong>{item.product_name}</strong><p>{item.sku} · {item.quantity} × {inr(item.unit_price)}</p></div><strong>{inr(item.line_total)}</strong></div>
+        <div className="line" key={item.id}><img src={item.image} alt="" /><div><strong>{item.product_name}</strong><p>{item.sku} · Qty {item.quantity}</p></div><strong>{inr(item.line_total)}</strong></div>
       ))}
       <div className="summary" style={{ marginTop: 12 }}>
         <div className="sum-row"><span>Subtotal</span><span>{inr(order.subtotal)}</span></div>

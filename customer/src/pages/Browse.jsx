@@ -5,10 +5,8 @@ import { ProductCard, State, useMeta } from '../shell';
 
 const sorts = [
   ['newest', 'Newest'],
-  ['price_asc', 'Price, low to high'],
-  ['price_desc', 'Price, high to low'],
   ['popular', 'Popular'],
-  ['bestselling', 'Best selling'],
+  ['bestselling', 'Curated'],
   ['name', 'Alphabetical'],
 ];
 
@@ -68,12 +66,27 @@ function Crumbs({ items }) {
 
 function Intro({ item }) {
   const bullets = Array.isArray(item.bullet_points) ? item.bullet_points : [];
+  const isFdc = item.slug === 'first-day-covers';
+  const subFallback = {
+    'first-day-covers': '/stamps/hero_cover_cropped.png',
+    'princely-states': '/stamps/princely_states_sheet1.png',
+    'birds': '/stamps/birds_monal_sheet.png',
+    'oddities-mint': '/stamps/princely_states_sheet3.png',
+  };
+  const imgUrl = subFallback[item.slug] || item.image;
   return (
     <header className="page-intro">
-      {item.image && <img src={item.image} alt="" />}
+      {imgUrl && <img src={imgUrl} alt={item.name} />}
       <div>
         <h1>{item.name}</h1>
         <p>{item.description}</p>
+        {isFdc && (
+          <p style={{ marginTop: 8 }}>
+            <a href="https://www.collectorbazar.com/categories/fdc-special-covers-brochures" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline', fontSize: 13 }}>
+              Reference source: CollectorBazar FDC Special Covers & Brochures ↗
+            </a>
+          </p>
+        )}
         {bullets.length > 0 && <ul className="bullets">{bullets.map((b) => <li key={b}>{b}</li>)}</ul>}
       </div>
     </header>
@@ -89,7 +102,7 @@ function Catalog({ locked = {} }) {
   const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const query = params.get('q') || '';
-  useMeta(locked.category ? '' : (query ? `Search: ${query}` : 'Shop stamps'), locked.category ? '' : 'Browse the Folio cabinet by country, year, condition, and rarity.');
+  useMeta(locked.category ? '' : (query ? `Search: ${query}` : 'Shop stamps'), locked.category ? '' : 'Browse the Stamps cabinet by country, year, condition, and rarity.');
 
   const qs = new URLSearchParams(params);
   if (locked.category) qs.set('category', locked.category);
@@ -119,11 +132,6 @@ function Catalog({ locked = {} }) {
 
   const filterBlock = (
     <aside className="filters">
-      <h3>Price</h3>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input aria-label="Minimum price" type="number" placeholder="Min" defaultValue={params.get('min_price') || ''} onBlur={(e) => set('min_price', e.target.value)} />
-        <input aria-label="Maximum price" type="number" placeholder="Max" defaultValue={params.get('max_price') || ''} onBlur={(e) => set('max_price', e.target.value)} />
-      </div>
       <h3>Availability</h3>
       {[['','Any'], ['in_stock','In stock'], ['low_stock','Low stock'], ['out_of_stock','Out of stock']].map(([value, label]) => (
         <label key={label}><input type="radio" name="availability" checked={(params.get('availability') || '') === value} onChange={() => set('availability', value)} />{label}</label>
@@ -131,9 +139,32 @@ function Catalog({ locked = {} }) {
       {!locked.category && (
         <>
           <h3>Category</h3>
-          {categories.map((category) => (
-            <label key={category.id}><input type="radio" name="cat" checked={params.get('category') === category.slug} onChange={() => set('category', category.slug)} />{category.name}</label>
-          ))}
+          <label><input type="radio" name="cat" checked={!params.get('category')} onChange={() => { set('category', ''); set('subcategory', ''); }} />All Categories</label>
+          {categories.map((category) => {
+            const isSelected = params.get('category') === category.slug;
+            return (
+              <div key={category.id}>
+                <label>
+                  <input type="radio" name="cat" checked={isSelected} onChange={() => { set('category', category.slug); set('subcategory', ''); }} />
+                  {category.slug === 'indian-stamps' ? 'Stamps from India' : 'World Stamps'}
+                </label>
+                {isSelected && category.subcategories && (
+                  <div style={{ paddingLeft: 16, margin: '4px 0 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <label style={{ fontSize: 13, color: 'var(--muted)' }}>
+                      <input type="radio" name="subcat" checked={!params.get('subcategory')} onChange={() => set('subcategory', '')} />
+                      All {category.name}
+                    </label>
+                    {category.subcategories.map((sub) => (
+                      <label key={sub.id} style={{ fontSize: 13 }}>
+                        <input type="radio" name="subcat" checked={params.get('subcategory') === sub.slug} onChange={() => set('subcategory', sub.slug)} />
+                        {sub.name}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </>
       )}
       {facets && [
@@ -191,16 +222,96 @@ export function CmsPage() {
   const { slug } = useParams();
   const [page, setPage] = useState(null);
   const [error, setError] = useState('');
+  const [sent, setSent] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
+
   useEffect(() => {
     api(`/api/cms/${slug}`).then((res) => setPage(res.page)).catch((err) => setError(err.message));
   }, [slug]);
-  useMeta(page?.seo_title || page?.title, page?.seo_description);
+
+  const title = page?.title.replace(/\bFolio\b/gi, 'Stamps from everywhere');
+  const content = page?.content
+    .replace(/Folio is a stamp desk\./gi, 'We are a stamp desk.')
+    .replace(/desk@folio\.test/gi, 'desk@stampsfromeverywhere.test')
+    .replace(/\bFolio\b/gi, 'Stamps from everywhere');
+  const seoTitle = page?.seo_title?.replace(/\bFolio\b/gi, 'Stamps from everywhere');
+  useMeta(seoTitle || title, page?.seo_description);
+
   if (error) return <div className="wrap"><State error /></div>;
   if (!page) return <div className="wrap"><State loading /></div>;
+
+  const isContact = slug === 'contact';
+  const isAbout = slug === 'about-us';
+
   return (
-    <div className="wrap" style={{ padding: '24px 0 48px', maxWidth: 760 }}>
-      <h1 style={{ fontSize: 48 }}>{page.title}</h1>
-      {page.content.split('\n').filter(Boolean).map((para) => <p key={para} style={{ marginTop: 14 }}>{para}</p>)}
+    <div className="wrap" style={{ padding: '28px 0 54px', maxWidth: 820 }}>
+      <h1 style={{ fontSize: 44, marginBottom: 12 }}>{isContact ? 'Contact us' : title}</h1>
+      {content.split('\n').filter(Boolean).map((para) => <p key={para} style={{ marginTop: 14, fontSize: 16, lineHeight: 1.6 }}>{para}</p>)}
+
+      {isContact && (
+        <div style={{ marginTop: 32 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, margin: '24px 0 32px' }}>
+            <div style={{ background: '#f8faf9', border: '1px solid var(--line)', padding: 18, borderRadius: 14 }}>
+              <strong style={{ display: 'block', color: 'var(--ink)', fontSize: 15, marginBottom: 4 }}>Email Inquiries</strong>
+              <span style={{ fontSize: 13, color: 'var(--muted)' }}>desk@stampsfromeverywhere.test</span>
+            </div>
+            <div style={{ background: '#f8faf9', border: '1px solid var(--line)', padding: 18, borderRadius: 14 }}>
+              <strong style={{ display: 'block', color: 'var(--ink)', fontSize: 15, marginBottom: 4 }}>Phone Desk</strong>
+              <span style={{ fontSize: 13, color: 'var(--muted)' }}>+91 98450 11122</span>
+            </div>
+            <div style={{ background: '#f8faf9', border: '1px solid var(--line)', padding: 18, borderRadius: 14 }}>
+              <strong style={{ display: 'block', color: 'var(--ink)', fontSize: 15, marginBottom: 4 }}>Appointment Desk</strong>
+              <span style={{ fontSize: 13, color: 'var(--muted)' }}>Bengaluru, Karnataka, India</span>
+            </div>
+          </div>
+
+          <div style={{ background: '#ffffff', border: '1px solid var(--line)', borderRadius: 20, padding: 28, boxShadow: 'var(--shadow)' }}>
+            <h2 style={{ fontSize: 24, marginBottom: 8 }}>Send our desk a note</h2>
+            <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 20 }}>Have questions about a stamp series, order tracking, or philatelic authentication? Reach out below.</p>
+            {sent ? (
+              <div style={{ background: '#edf7f2', color: '#1e6b4f', padding: '16px 20px', borderRadius: 12, fontWeight: 500 }}>
+                ✓ Thank you! Your message has been sent to our desk. We will get back to you shortly.
+              </div>
+            ) : (
+              <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+                  <label className="field">
+                    <span>Your Name</span>
+                    <input required value={contactForm.name} onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })} placeholder="Meera Iyer" />
+                  </label>
+                  <label className="field">
+                    <span>Email Address</span>
+                    <input required type="email" value={contactForm.email} onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })} placeholder="meera@example.com" />
+                  </label>
+                </div>
+                <label className="field">
+                  <span>Subject</span>
+                  <input required value={contactForm.subject} onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })} placeholder="Inquiry about Indian Stamps" />
+                </label>
+                <label className="field">
+                  <span>Message</span>
+                  <textarea required rows={4} value={contactForm.message} onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })} placeholder="Write your inquiry or question here..." style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid var(--line)' }} />
+                </label>
+                <button type="submit" className="btn" style={{ alignSelf: 'flex-start', marginTop: 6 }}>Send message →</button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isAbout && (
+        <div style={{ marginTop: 36, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <Link to="/stamps/indian-stamps" className="btn" style={{ background: '#c45525', borderColor: '#c45525' }}>
+            Explore Indian Stamps (5 Categories) →
+          </Link>
+          <Link to="/stamps/world-stamps" className="btn light" style={{ borderColor: '#1e6b4f', color: '#1e6b4f' }}>
+            Explore World Stamps →
+          </Link>
+          <Link to="/stamps" className="btn ghost">
+            View All Products
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

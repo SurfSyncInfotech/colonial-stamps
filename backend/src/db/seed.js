@@ -14,66 +14,61 @@ function escapeXml(value) {
   return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function item(name, sku, price, sale, year, denom, type, condition, grade, rarity, collection, catalogue, stock, featured, arrival, blurb, country = 'India') {
-  return { name, sku, price, sale_price: sale, issue_year: year, denomination: denom, stamp_type: type, condition, grade, rarity, collection_name: collection, catalogue_number: catalogue, stock, is_featured: featured, is_new_arrival: arrival, short_description: blurb, country, tags: [country.toLowerCase(), String(year), type.toLowerCase()] };
+function item(name, sku, price, sale, year, denom, type, condition, grade, rarity, collection, catalogue, stock, featured, arrival, blurb, country = 'India', image = null) {
+  return { name, sku, price, sale_price: sale, issue_year: year, denomination: denom, stamp_type: type, condition, grade, rarity, collection_name: collection, catalogue_number: catalogue, stock, is_featured: featured, is_new_arrival: arrival, short_description: blurb, country, image, tags: [country.toLowerCase(), String(year), type.toLowerCase()] };
 }
 
 const catalog = [
-  ['Indian Stamps', 'indian-stamps', 1, 'Definitives and commemoratives printed for India, from the last years of the Raj through the Republic.', ['India Post and earlier issues', 'Catalogue numbers where they are agreed', 'Sleeved before dispatch'], [
-    ['Independence', 'independence', 'The 1947 set, described stamp by stamp.', ['15 August 1947', 'Mint and fine used kept apart'], [
-      item('1947 Independence 1½ Annas', 'IND-1947-1A5', 2450, 1890, 1947, '1½ annas', 'Commemorative', 'Mint never hinged', 'VF', 'Scarce', 'Independence 1947', 'SG 301', 6, 1, 0, 'National Flag design, fresh colour, original gum.'),
-      item('1947 Independence 12 Annas', 'IND-1947-12A', 8400, 7150, 1947, '12 annas', 'Commemorative', 'Mint never hinged', 'XF', 'Rare', 'Independence 1947', 'SG 303', 2, 1, 0, 'Top value of the set. Centering is clear of the perforations.'),
+  ['Indian Stamps', 'indian-stamps', 1, 'We focus on stamps from India. Explore First Day Covers, Princely States, Independent India issues, Mahatma Gandhi memorials, and British India Colonial postage.', ['Authentic issues from 1854 to the Republic', 'First Day Covers & Princely States', 'Mahatma Gandhi commemoratives'], [
+    ['First Day Covers', 'first-day-covers', '-Independence Growth: As the Department of Posts (formerly Indian Posts and Telegraphs) expanded its commemorative stamp program in the 1950s, private and semi-official FDCs started gaining traction among collectors. Iconic early sets included the 1950 Republic of India issue, the 1951 Asian Games, and the 1953 Mount Everest series', ['1950 Republic of India FDCs', '1983 Siberian Crane Workshop FDC', 'Iconic Indian First Day Covers'], [
+      item('1950 Republic of India Inauguration First Day Cover', 'IND-FDC-1950-REP', 3800, 3200, 1950, '12 annas', 'FDC', 'Mint / Fine used', 'VF', 'Scarce', 'Republic 1950', 'SG FDC-1', 4, 1, 0, 'Iconic 1950 Republic of India inauguration issue FDC with special New Delhi postmark.', 'India', '/uploads/seed/hero_cover_cropped.png'),
+      item('1983 Siberian Crane Bharatpur Workshop First Day Cover', 'IND-FDC-1983-CRANE', 2400, 1950, 1983, '285', 'FDC', 'Fine used', 'VF', 'Scarce', 'Siberian Crane 1983', 'SG FDC-CRANE', 6, 1, 1, 'First Day Cover celebrating the International Crane Workshop at Bharatpur with 285 Siberian Crane stamp and Calcutta postmark.', 'India', '/uploads/seed/fdc_siberian_crane_1983.png'),
+      item('1953 Mount Everest Expedition Commemorative Cover', 'IND-FDC-1953-EVE', 4500, 3900, 1953, '14 annas', 'FDC', 'Very Fine', 'XF', 'Rare', 'Mount Everest 1953', 'SG FDC-7', 3, 0, 1, 'Mount Everest conquer commemorative FDC honoring Tenzing Norgay and Edmund Hillary.', 'India', '/uploads/seed/first_day_cover.jpg'),
     ]],
-    ['Personalities', 'personalities', 'Portrait issues chosen for impression and paper.', ['Mourning and centenary issues', 'Condition in plain language'], [
-      item('1948 Gandhi 1½ Annas Mourning', 'IND-1948-G15', 18500, null, 1948, '1½ annas', 'Mourning', 'Mint lightly hinged', 'VF', 'Rare', 'Gandhi 1948', 'SG 305', 2, 1, 0, 'The lower value of the mourning set. Still a serious album piece.'),
-      item('1969 Gandhi Centenary 20 Paise', 'IND-1969-G20', 420, 340, 1969, '20 paise', 'Commemorative', 'Mint never hinged', 'XF', 'Common', 'Gandhi centenary', 'SG 591', 18, 0, 1, 'A clean centenary single beside the 1948 set.'),
+    ['Princely States', 'princely-states', "The British issued 'their own' stamps and were used by all British Government Department and Ministries, Additionally Individual Princely States issued their own stamps that were accepted by other Colonial States", ['Feudatory state issues', 'Accepted across colonial borders', 'Authentic royal crests and scripts'], [
+      item('Indian Princely States Archival Exhibit Sheet I', 'IND-PRINCE-SHEET1', 12500, 10500, 1930, 'Various', 'Feudatory Sheet', 'Mint / Used', 'VF', 'Rare', 'Princely States', 'PS-SHT-1', 2, 1, 1, 'Original philatelic study sheet containing Jaipur State, Gwalior Service, Hyderabad Charminar, Bahawalpur, and Indore.', 'Princely States', '/uploads/seed/princely_states_sheet1.png'),
+      item('Indian Princely States Archival Exhibit Sheet II', 'IND-PRINCE-SHEET2', 11000, 9500, 1935, 'Various', 'Feudatory Sheet', 'Mint / Used', 'VF', 'Rare', 'Princely States', 'PS-SHT-2', 2, 1, 0, 'Exquisite assembly of Cochin Anchal, Gwalior Service, Duttia, Hyderabad Victory, and Travancore.', 'Princely States', '/uploads/seed/princely_states_sheet2.png'),
+      item('Bhopal State 2 Annas Moti Masjid Service Issue', 'IND-PRINCE-BHOPAL', 2400, 1950, 1936, '2 annas', 'Official Service', 'Mint', 'VF', 'Scarce', 'Bhopal State', 'SG O325', 5, 1, 1, 'Bhopal State Service stamp depicting the historic Moti Masjid with official State Royal Arms.', 'Bhopal', '/uploads/seed/princely_bhopal_service.png'),
+      item('Jaipur State Service 3/4 Anna Issue', 'IND-PRINCE-JAI', 2200, null, 1931, '3/4 anna', 'Feudatory', 'Mint lightly hinged', 'VF', 'Scarce', 'Jaipur State', 'SG 58', 4, 1, 0, 'Jaipur State Service official overprint in crisp orange vermilion with Maharaja portrait.', 'Jaipur', '/uploads/seed/princely_jaipur_state.png'),
+      item('Hyderabad One Anna Charminar Post & Receipt', 'IND-PRINCE-HYD', 3600, 2900, 1931, '1 anna', 'Feudatory', 'Mint', 'VF', 'Scarce', 'Hyderabad State', 'SG 62', 5, 1, 0, 'Hyderabad State One Anna Post & Receipt featuring iconic Charminar architectural monument.', 'Hyderabad', '/uploads/seed/princely_hyderabad_charminar.png'),
+      item('Cochin Anchal Six Pies Carmine Issue', 'IND-PRINCE-COCHIN6', 1850, 1500, 1933, '6 pies', 'Feudatory', 'Mint', 'VF', 'Scarce', 'Cochin State', 'SG 68', 6, 0, 1, 'Cochin Anchal Six Pies issue with Raja Rama Varma portrait in deep carmine red.', 'Cochin', '/uploads/seed/princely_cochin_anchal.png'),
+      item('Travancore Anchel One Chuckram Green Service', 'IND-PRINCE-TRV', 1650, 1400, 1939, '1 chuckram', 'Feudatory', 'Unused', 'F-VF', 'Uncommon', 'Travancore', 'SG 71', 6, 0, 1, 'Travancore Anchel Service definitive in deep forest green with Conch Shell emblem.', 'Travancore', '/uploads/seed/princely_travancore_anchal.png'),
     ]],
-    ['Monuments', 'monuments', 'Architecture on Indian paper.', ['Monuments named on the mount', 'Fine used only when the cancel is light'], [
-      item('1952 Taj Mahal 2 Annas', 'IND-1952-TAJ', 1150, null, 1952, '2 annas', 'Definitive', 'Mint never hinged', 'VF', 'Uncommon', 'Archaeological series', 'SG 340', 8, 1, 0, 'The Taj from the archaeological set, warm brown and still bright.'),
+    ['Independent India', 'independent-india', 'Many Indian Postal Ministry stamps have themes that relate to developments across our nation. Themes across our religions. National and International events. Sports are always featured! Stamps depicting individuals too', ['Post-1947 Republic of India issues', 'National development & sports themes', 'Iconic Jai Hind 1947 series'], [
+      item('1947 Independence 3½ Annas Jai Hind Flag & Ashoka Lion', 'IND-1947-3A5', 3500, 2800, 1947, '3½ annas', 'Commemorative', 'Mint never hinged', 'XF', 'Scarce', 'Independence 1947', 'SG 302', 8, 1, 0, 'The iconic 15 August 1947 Independence issue featuring the National Flag and Ashoka Lion Capital.', 'India', '/uploads/seed/independence_stamp.jpg'),
+      item('1947 Independence 12 Annas Ashoka Lion Capital', 'IND-1947-12A', 8400, 7150, 1947, '12 annas', 'Commemorative', 'Mint never hinged', 'XF', 'Rare', 'Independence 1947', 'SG 303', 3, 1, 0, 'Top value of the 1947 Independence trio. Clean original gum, pristine centering.', 'India', '/uploads/seed/independence_flag.jpg'),
+      item('1952 Archaeological Series Taj Mahal 2 Annas', 'IND-1952-TAJ', 1150, null, 1952, '2 annas', 'Definitive', 'Mint never hinged', 'VF', 'Uncommon', 'Archaeological Series', 'SG 340', 10, 0, 0, 'Many Indian Postal Ministry stamps have themes that relate to national developments, monuments and cultural heritage.', 'India', '/uploads/seed/independence_flag.jpg'),
+      item('1951 First Asian Games 2 Annas New Delhi', 'IND-1951-SPORTS', 760, 640, 1951, '2 annas', 'Commemorative', 'Mint lightly hinged', 'VF', 'Uncommon', 'Asian Games Delhi', 'SG 336', 8, 0, 1, 'Sports are always featured! New Delhi 1951, the inaugural Asian Games on Indian postal paper.', 'India', '/uploads/seed/independence_flag.jpg'),
     ]],
-  ]],
-  ['Foreign Stamps', 'foreign-stamps', 1, 'A small foreign cabinet: Commonwealth, Europe, and the United States, bought as singles.', ['One country family per mount', 'No modern kiloware'], [
-    ['British Commonwealth', 'commonwealth', 'London and Commonwealth issues that sit beside Indian definitives.', ['Reign commemoratives', 'No reprints'], [
-      item('1935 Silver Jubilee 1d', 'GB-1935-1D', 980, null, 1935, '1d', 'Commemorative', 'Mint lightly hinged', 'VF', 'Uncommon', 'Silver Jubilee', 'SG 453', 7, 0, 0, 'Great Britain, the lowest Jubilee value, clean and lightly hinged.', 'United Kingdom'),
-      item('1953 Coronation 2½d', 'GB-1953-25', 640, 520, 1953, '2½d', 'Commemorative', 'Mint never hinged', 'XF', 'Common', 'Coronation', 'SG 532', 12, 0, 1, 'Elizabeth II coronation, never hinged.', 'United Kingdom'),
+    ['GANDHI', 'gandhi', "MAHATMA Gandhi has been featured on many different stamps since Independence and have always been a collectable item. School children wrote essays and 'stuck' a Gandhi stamp on it. Gandhi is Gandhi if you are Indian.", ['1948 Memorial mourning issue', 'Centenary issues', 'National icon collectible stamps'], [
+      item('1948 Mahatma Gandhi 10 Annas Memorial Issue', 'IND-1948-G10', 18500, 16000, 1948, '10 annas', 'Mourning', 'Mint lightly hinged', 'VF', 'Rare', 'Gandhi 1948', 'SG 307', 2, 1, 0, "MAHATMA Gandhi has been featured on many different stamps since Independence and have always been a collectable item. School children wrote essays and 'stuck' a Gandhi stamp on it.", 'India', '/uploads/seed/gandhi_stamp.jpg'),
+      item('1948 Mahatma Gandhi 3½ Annas Memorial Single', 'IND-1948-G35', 6500, 5800, 1948, '3½ annas', 'Mourning', 'Mint lightly hinged', 'VF', 'Scarce', 'Gandhi 1948', 'SG 305', 4, 1, 1, '1948 Mourning issue in rich sepia terracotta, original gum, authenticated single.', 'India', '/uploads/seed/gandhi_top.jpg'),
+      item('1969 Gandhi Centenary 20 Paise Definitive', 'IND-1969-G20', 420, 340, 1969, '20 paise', 'Commemorative', 'Mint never hinged', 'XF', 'Common', 'Gandhi Centenary', 'SG 591', 20, 0, 1, "Centenary issue celebrating Mahatma Gandhi's birth, clean mint never hinged.", 'India', '/uploads/seed/gandhi_stamp.jpg'),
     ]],
-    ['Europe', 'europe', 'A few European designs chosen for the engraving.', ['France and Germany', 'Engraved designs preferred'], [
-      item('1949 France Marianne 15f', 'FR-1949-15', 740, null, 1949, '15f', 'Definitive', 'Mint lightly hinged', 'VF', 'Common', 'Marianne', 'YT 810', 9, 0, 0, 'A post-war Marianne, the engraving still crisp.', 'France'),
-    ]],
-    ['United States', 'united-states', 'American issues collectors already know by the picture.', ['Classic commemoratives', 'Cancel quality stated'], [
-      item('1969 Moon Landing 6c', 'US-1969-MOON', 450, 360, 1969, '6c', 'Commemorative', 'Mint never hinged', 'XF', 'Common', 'Space', 'Scott 1371', 15, 0, 1, 'First man on the Moon, a plate-fresh single.', 'United States'),
-    ]],
-  ]],
-  ['Historical Stamps', 'historical-stamps', 0, 'Earlier paper: lithographs, George VI, and the states that printed for themselves.', ['Condition is conservative', 'Repairs are disclosed'], [
-    ['Pre-Independence', 'pre-independence', 'Queen and King issues before 1947.', ['Margins described', 'No cleaned cancels'], [
-      item('1854 Half Anna Blue', 'IN-1854-HALF', 42000, null, 1854, '½ anna', 'Lithograph', 'Used', 'F-VF', 'Very rare', '1854 lithographs', 'SG 2', 1, 1, 0, 'A four-margin half anna, light cancel, no thins. One in the cabinet.'),
-      item('1937 George VI 1 Anna', 'IN-1937-1A', 680, null, 1937, '1 anna', 'Definitive', 'Mint lightly hinged', 'VF', 'Uncommon', 'George VI', 'SG 249', 8, 0, 0, 'The carmine one-anna definitive. Hinge remnant noted.'),
-    ]],
-    ['Princely States', 'princely-states', 'Feudatory issues, identified rather than lumped together.', ['State named on the invoice', 'Forgeries are not stocked'], [
-      item('Jaipur 1 Anna Chariot', 'ST-JAIPUR-1A', 2200, null, 1931, '1 anna', 'Feudatory', 'Mint', 'VF', 'Scarce', 'Jaipur', 'SG 58', 3, 1, 0, 'The chariot design, full perforations.', 'Jaipur'),
-      item('Travancore 1 Chuckram', 'ST-TRAV-1CH', 1650, 1400, 1939, '1 chuckram', 'Feudatory', 'Unused', 'F-VF', 'Scarce', 'Travancore', 'SG 62', 4, 0, 0, 'Conch shell. One corner lightly toned, and the listing says so.', 'Travancore'),
+    ['British India Colonial', 'british-india-colonial', 'As used by the British for all British Government Postage', ['Queen Victoria & George V/VI issues', 'Official Government postage', 'First stamps of India from 1854'], [
+      item('1937 King George VI 1 Rupee British India Colonial', 'IND-BRIT-1R', 4800, 3950, 1937, '1 rupee', 'Definitive', 'Mint lightly hinged', 'VF', 'Scarce', 'George VI Colonial', 'SG 258', 4, 1, 0, 'As used by the British for all British Government Postage, Departments and Ministries.', 'British India', '/uploads/seed/british_india.jpg'),
+      item('1854 Half Anna Blue Queen Victoria Lithograph', 'IND-BRIT-1854', 42000, null, 1854, '½ anna', 'Lithograph', 'Used', 'F-VF', 'Very rare', '1854 Lithographs', 'SG 2', 1, 1, 0, 'First postage stamp of India under British administration. Classic four margins.', 'British India', '/uploads/seed/british_india.jpg'),
+      item('1911 King George V 2 Annas British India Postage', 'IND-BRIT-1911', 950, null, 1911, '2 annas', 'Definitive', 'Mint lightly hinged', 'VF', 'Uncommon', 'George V Colonial', 'SG 165', 9, 0, 1, 'Classic King George V definitive used across colonial post offices.', 'British India', '/uploads/seed/british_india.jpg'),
     ]],
   ]],
-  ['Wildlife Stamps', 'wildlife-stamps', 1, 'Birds and mammals printed for letters and kept for the page.', ['Species named', 'Colour is described, not enhanced'], [
-    ['Birds', 'birds', 'From the pitta to the crane.', ['India wildlife issues', 'Mint unless stated'], [
-      item('1975 Indian Pitta', 'WL-1975-PITTA', 540, null, 1975, '25p', 'Commemorative', 'Mint never hinged', 'XF', 'Common', 'Indian birds', 'SG 768', 16, 0, 1, 'The pitta in full colour.'),
-      item('1968 Siberian Crane', 'WL-1968-CRANE', 480, 390, 1968, '20p', 'Commemorative', 'Mint never hinged', 'VF', 'Common', 'WWF birds', 'SG 564', 13, 1, 0, 'A quiet crane, never hinged.'),
+  ['World Stamps', 'world-stamps', 1, 'WORLD STAMPS: United Kingdom (England), Spain, Poland, Australia, Birds, and Mint Oddities from historical world collections.', ['United Kingdom, Spain & Poland classics', 'Australia & Birds wildlife issues', 'Oddities - Mint and rare error varieties'], [
+    ['United Kingdom (England) Spain. Poland', 'uk-spain-poland', 'Classic European stamps featuring United Kingdom (England) Penny issues, Spain historical commemoratives, and Poland postal issues.', ['Great Britain Penny issues', 'Classic Spanish & Polish commemoratives', 'Archival preserved paper'], [
+      item('1841 Great Britain Penny Red Queen Victoria', 'WR-UK-1841', 2200, null, 1841, '1d', 'Definitive', 'Used', 'VF', 'Scarce', 'Great Britain Victoria', 'SG 8', 5, 0, 0, 'Classic 1d Penny Red from England, sharp Maltese Cross cancellation.', 'United Kingdom', '/uploads/seed/world_uk.jpg'),
+      item('1930 Spain Seville International Exhibition', 'WR-SPAIN-1930', 1450, 1200, 1930, '30c', 'Commemorative', 'Mint lightly hinged', 'VF', 'Uncommon', 'Spain Exhibitions', 'Edifil 502', 7, 0, 1, 'Intricate Spanish engraving celebrating historical art and architecture.', 'Spain', '/uploads/seed/world_uk.jpg'),
+      item('1945 Poland Post-War Reconstruction Issue', 'WR-POL-1945', 850, null, 1945, '5zl', 'Commemorative', 'Mint never hinged', 'XF', 'Common', 'Poland Warsaw', 'Fischer 360', 12, 0, 1, 'Historical commemorative issue from Warsaw post-war series.', 'Poland', '/uploads/seed/world_uk.jpg'),
     ]],
-    ['Mammals', 'mammals', 'Lion and the high-country cat.', ['Single stamps', 'Stock is counted'], [
-      item('1976 Asiatic Lion', 'WL-1976-LION', 620, null, 1976, '25p', 'Commemorative', 'Mint never hinged', 'XF', 'Uncommon', 'Indian wildlife', 'SG 812', 10, 1, 0, 'Gir lion, strong orange, full perforations.'),
-      item('1983 Snow Leopard', 'WL-1983-LEO', 890, 760, 1983, '100p', 'Commemorative', 'Mint never hinged', 'XF', 'Uncommon', 'Himalayan fauna', 'SG 1066', 7, 1, 1, 'A sharp leopard, the higher value of its set.'),
+    ['AUSTRALIA', 'australia', 'Classic Australian philately: early Kangaroo and Map series, Kookaburra commemoratives, and exhibition sheets.', ['Historic Kangaroo and Map issues', '1928 Kookaburra exhibition issues', 'Verified watermarks & original mint gum'], [
+      item('1928 Australia 3d Kookaburra Melbourne Exhibition', 'WR-AUS-1928', 3200, 2600, 1928, '3d', 'Commemorative', 'Mint never hinged', 'XF', 'Scarce', 'Australia Exhibition', 'SG 106', 4, 1, 0, 'Iconic Australian Kookaburra mini-sheet issue in crisp green and brown.', 'Australia', '/uploads/seed/world_australia.jpg'),
+      item('1913 Australia 1d Kangaroo and Map Red Single', 'WR-AUS-1913', 1900, null, 1913, '1d', 'Definitive', 'Mint lightly hinged', 'VF', 'Uncommon', 'Kangaroo and Map', 'SG 2', 6, 0, 1, "Historic 'Roo on Map' definitive, classic red single with crisp watermark.", 'Australia', '/uploads/seed/world_australia.jpg'),
     ]],
-  ]],
-  ['Sports Stamps', 'sports-stamps', 0, 'Games issues, mostly Indian, kept because the design is the point.', ['Olympic and Asian Games', 'Mint unless a used example is better'], [
-    ['Olympics', 'olympics', 'India’s Olympic commemoratives.', ['Host-city designs', 'Never hinged where stated'], [
-      item('1980 Moscow Olympics', 'SP-1980-MOS', 510, null, 1980, '30p', 'Commemorative', 'Mint never hinged', 'XF', 'Common', 'Olympic Games', 'SG 978', 12, 0, 1, 'India’s Moscow Games issue, clean and bright.'),
-      item('1951 Asian Games 2 Annas', 'SP-1951-AG', 760, 640, 1951, '2 annas', 'Commemorative', 'Mint lightly hinged', 'VF', 'Uncommon', 'Asian Games Delhi', 'SG 336', 6, 1, 0, 'New Delhi 1951, the first Asian Games on Indian paper.'),
+    ['BIRDS', 'birds', 'Worldwide ornithological stamps celebrating birds: Himalayan Monal Pheasant, Siberian Crane, and global avian wildlife.', ['Avian species from around the world', 'Vibrant multi-color lithographs', 'Mint unhinged singles'], [
+      item('1975 Monal Pheasant Complete Mint Sheet', 'WR-BIRD-SHEET', 5400, 4800, 1975, '200', 'Mint Sheet', 'Mint never hinged', 'XF', 'Rare', 'Indian Birds', 'SG 768-SHT', 3, 1, 1, 'Spectacular complete mint archival sheet of Monal Pheasant 200 stamps with full sheet margins.', 'India', '/uploads/seed/birds_monal_sheet.png'),
+      item('1975 Indian Monal Pheasant 200 Mint Single', 'WR-BIRD-MONAL', 1250, 980, 1975, '200', 'Definitive', 'Mint never hinged', 'XF', 'Uncommon', 'Indian Birds', 'SG 768', 12, 1, 0, 'Vibrant 1975 Himalayan Monal Pheasant definitive in iridescent blue plumage, pristine mint.', 'India', '/uploads/seed/birds_monal_pheasant.png'),
+      item('1983 Siberian Crane Bharatpur Workshop 285', 'WR-BIRD-CRANE', 480, 390, 1983, '285', 'Commemorative', 'Mint never hinged', 'VF', 'Common', 'Siberian Crane', 'SG 942', 15, 0, 1, 'International Crane Workshop Bharatpur commemorative stamp featuring Siberian Cranes.', 'India', '/uploads/seed/siberian_crane_stamp.png'),
     ]],
-  ]],
-  ['Commemorative Stamps', 'commemorative-stamps', 1, 'National days and cultural issues, the stamps people remember seeing.', ['Republic and anniversary issues', 'Gum and centering described'], [
-    ['National Days', 'national-days', 'Republic Day and the anniversaries that followed.', ['26 January issues', 'Anniversary sets'], [
-      item('1950 Republic Inauguration', 'CM-1950-REP', 2800, null, 1950, '2 annas', 'Commemorative', 'Mint lightly hinged', 'VF', 'Scarce', 'Republic 1950', 'SG 325', 5, 1, 0, 'The Lion Capital inauguration commemorative, clear of the perforations.'),
-      item('1972 Silver Jubilee of Independence', 'CM-1972-25', 390, 320, 1972, '20 paise', 'Commemorative', 'Mint never hinged', 'XF', 'Common', '25 years', 'SG 665', 18, 0, 1, 'Twenty-five years on, a fresh single from a large printing.'),
+    ['ODDITIES - MINT -', 'oddities-mint', 'Philatelic oddities, printer errors, double impressions, watermark errors, and rare miscuts in pristine Mint condition.', ['Printing errors & watermark varieties', 'Mint Never Hinged (MNH) preservation', 'Guaranteed authentic philatelic oddities'], [
+      item('Complete Mint Sheet Monal Pheasant 200 Archival Issue', 'WR-ODD-MONAL', 9500, 8200, 1975, '200', 'Mint Sheet', 'Mint never hinged', 'XF', 'Very rare', 'Complete Mint Sheets', 'VAR-1975-SHT', 2, 1, 1, 'Pristine complete printer sheet of 1975 Monal Pheasant with all border selvages intact.', 'India', '/uploads/seed/birds_monal_sheet.png'),
+      item('Indian Princely States Archival Exhibit Sheet III', 'WR-ODD-PRINCE', 14500, 12000, 1935, 'Various', 'Exhibition Sheet', 'Mint / Used', 'VF', 'Rare', 'Princely States', 'VAR-PS-SHT3', 2, 1, 0, 'Rare philatelic exhibition display sheet featuring Bhopal, Travancore, Bahawalpur, and Indore.', 'Princely States', '/uploads/seed/princely_states_sheet3.png'),
     ]],
   ]],
 ];
@@ -131,7 +126,7 @@ export async function seed() {
     const result = await query('INSERT INTO admin_users (role_id, full_name, email, mobile, password_hash, is_sample) VALUES (?, ?, ?, ?, ?, 1)', [roleIds[role], full_name, email, mobile, adminPassword]);
     if (!adminId) adminId = result.insertId;
   }
-  const settings = { require_customer_approval: 'true', gst_percent: '5', free_shipping_threshold: '2499', store_name: 'Folio', support_email: 'desk@folio.test', currency: 'INR', next_order_number: '10048' };
+  const settings = { require_customer_approval: 'true', gst_percent: '5', free_shipping_threshold: '2499', store_name: 'Stamps', support_email: 'desk@folio.test', currency: 'INR', next_order_number: '10048' };
   for (const [key, value] of Object.entries(settings)) await query('INSERT INTO settings (`key`, `value`) VALUES (?, ?)', [key, value]);
 
   const customers = [['Meera Iyer', 'meera.iyer@folio.test', '9845011122', 'approved'], ['Arjun Deshpande', 'arjun.deshpande@folio.test', '9822099341', 'approved'], ['Helen Ward', 'helen.ward@folio.test', '447700900123', 'approved'], ['Rohan Kapoor', 'rohan.kapoor@folio.test', '9900112233', 'pending'], ['Nia Shah', 'nia.shah@folio.test', '9765432108', 'blocked']];
@@ -146,8 +141,8 @@ export async function seed() {
   for (const [name, slug, featured, description, bullets, subs] of catalog) {
     const [ink, paper, accent] = palettes[catOrder % palettes.length];
     const catFile = `${slug}.svg`;
-    fs.writeFileSync(path.join(seedDir, catFile), stampSvg({ country: 'Folio', value: name.split(' ')[0], title: 'Cabinet', year: 'Desk', ink, paper, accent }));
-    const catResult = await query(`INSERT INTO categories (name, slug, image, description, bullet_points, status, display_order, seo_title, seo_description, is_featured, is_sample) VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, 1)`, [name, slug, `/uploads/seed/${catFile}`, description, JSON.stringify(bullets), catOrder, `${name} | Folio`, description.slice(0, 180), featured]);
+    fs.writeFileSync(path.join(seedDir, catFile), stampSvg({ country: 'Stamps', value: name.split(' ')[0], title: 'Cabinet', year: 'Desk', ink, paper, accent }));
+    const catResult = await query(`INSERT INTO categories (name, slug, image, description, bullet_points, status, display_order, seo_title, seo_description, is_featured, is_sample) VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, 1)`, [name, slug, `/uploads/seed/${catFile}`, description, JSON.stringify(bullets), catOrder, `${name} | Stamps`, description.slice(0, 180), featured]);
     let subOrder = 0;
     for (const [subName, subSlug, subDesc, subBullets, products] of subs) {
       const subFile = `${slug}-${subSlug}.svg`;
@@ -163,7 +158,7 @@ export async function seed() {
           JSON.stringify({ Paper: 'Original issue paper', Gum: product.condition }),
           product.country, product.issue_year, product.denomination, product.stamp_type, product.condition, product.grade, product.rarity, product.collection_name, product.catalogue_number, product.is_featured, product.is_new_arrival,
         ]);
-        await query('INSERT INTO product_images (product_id, url, alt_text, is_primary, display_order) VALUES (?, ?, ?, 1, 0)', [result.insertId, `/uploads/seed/${file}`, product.name]);
+        await query('INSERT INTO product_images (product_id, url, alt_text, is_primary, display_order) VALUES (?, ?, ?, 1, 0)', [result.insertId, product.image || `/uploads/seed/${file}`, product.name]);
         for (const tag of product.tags) await query('INSERT INTO product_tags (product_id, tag) VALUES (?, ?)', [result.insertId, tag]);
         await query('INSERT INTO product_attributes (product_id, attr_name, attr_value) VALUES (?, ?, ?), (?, ?, ?)', [result.insertId, 'Country', product.country, result.insertId, 'Catalogue', product.catalogue_number]);
         await query('INSERT INTO inventory (product_id, stock_on_hand) VALUES (?, ?)', [result.insertId, product.stock]);
@@ -181,8 +176,8 @@ export async function seed() {
   const sections = [['featured', 'Top picks for you', 1], ['categories', 'Browse the cabinet', 2], ['new_arrivals', 'New arrivals', 3], ['rare', 'Rare and collectible', 4], ['best_sellers', 'Best sellers', 5], ['reviews', 'Loved by collectors', 6]];
   for (const [key, title, order] of sections) await query("INSERT INTO homepage_sections (section_key, title, status, display_order) VALUES (?, ?, 'active', ?)", [key, title, order]);
   const pages = {
-    'about-us': ['About Folio', 'Folio is a stamp desk. We buy single stamps and small collections, describe them without theatre, and post them sleeved.'],
-    contact: ['Contact', 'Write to desk@folio.test. The desk reads mail on weekdays. Include the order number if you already have one.'],
+    'about-us': ['About Stamps from everywhere', 'We are a stamp desk. We buy single stamps and small collections, describe them without theatre, and post them sleeved.'],
+    contact: ['Contact', 'Write to desk@stampsfromeverywhere.test. The desk reads mail on weekdays. Include the order number if you already have one.'],
     faq: ['Questions', 'Do you sell reprints? No.\n\nCan I return a stamp? Yes, within 14 days if it is still as sent.\n\nWhen can I order? After the desk approves the account, if approval is turned on.'],
     terms: ['Terms and Conditions', 'Orders are offers until the desk confirms them. Descriptions are our opinion of condition. Title passes when the packet is handed to the carrier.'],
     privacy: ['Privacy Policy', 'We keep your name, email, mobile, and addresses to run the account and the order. We do not sell the list.'],
@@ -191,7 +186,7 @@ export async function seed() {
     'cancellation-policy': ['Cancellation Policy', 'You can cancel online while the order is placed, under review, or confirmed. Once it is packed, write to the desk.'],
   };
   for (const [slug, [title, content]] of Object.entries(pages)) {
-    await query("INSERT INTO cms_pages (title, slug, content, seo_title, seo_description, status) VALUES (?, ?, ?, ?, ?, 'published')", [title, slug, content, `${title} | Folio`, content.slice(0, 150)]);
+    await query("INSERT INTO cms_pages (title, slug, content, seo_title, seo_description, status) VALUES (?, ?, ?, ?, ?, 'published')", [title, slug, content, `${title} | Stamps`, content.slice(0, 150)]);
   }
 
   await placeSample(userIds['meera.iyer@folio.test'], 'FOL-10041', 'delivered', 'paid', ['IND-1947-1A5', 'WL-1968-CRANE'], '2026-09-12 10:20:00');

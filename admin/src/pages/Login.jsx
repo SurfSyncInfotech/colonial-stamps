@@ -22,7 +22,7 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-box">
-        <h1>FOLIO Admin</h1>
+        <h1>Stamps Admin</h1>
         <p>Sign in to manage Stamp House</p>
         <form onSubmit={handleSubmit}>
           <div className="form-group"><label>Email</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /></div>
