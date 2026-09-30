@@ -1,0 +1,12 @@
+{
+  "name": "folio-stamp-house",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix customer && npm install --prefix admin",
+    "db:setup": "npm run db:setup --prefix backend",
+    "dev": "npx concurrently -n api,shop,admin -c green,blue,magenta \"npm run dev --prefix backend\" \"npm run dev --prefix customer\" \"npm run dev --prefix admin\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
