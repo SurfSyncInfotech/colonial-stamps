@@ -26,7 +26,13 @@ export default function Layout({ children, title, description }) {
       <div className="utility-bar">Free insured shipping on orders above ₹5,000 · Authenticated stamps guaranteed</div>
       <header className="site-header">
         <div className="container header-inner">
-          <Link to="/" className="logo">Stamps<span>Stamp House</span></Link>
+          <Link to="/" className="logo" style={{ display: 'flex', alignItems: 'center' }}>
+            <img
+              src="/stamps/stamps%20logo%20(1).svg"
+              alt="Stamps Stamp House"
+              style={{ height: 54, width: 'auto', objectFit: 'contain' }}
+            />
+          </Link>
           <nav className="nav-links">
             <Link to="/stamps">Shop</Link>
             <Link to="/stamps/british-commonwealth">Commonwealth</Link>
@@ -67,7 +73,7 @@ export default function Layout({ children, title, description }) {
         <div className="container">
           <div className="footer-grid">
             <div>
-              <h4>Stamps Stamp House</h4>
+              <img src="/stamps/stamps%20logo%20(1).svg" alt="Stamps Stamp House" style={{ height: 44, width: 'auto', objectFit: 'contain', marginBottom: 8 }} />
               <p>Premium physical postage &amp; collector stamps since 1987.</p>
             </div>
             <div>

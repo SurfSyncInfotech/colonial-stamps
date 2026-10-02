@@ -1,5 +1,8 @@
+export const API_BASE = import.meta.env.VITE_API_URL || 'https://colonialbackend.surfsyncinfotech.xyz';
+
 export function inr(value) {
-  return '₹';
+  const num = Number(value || 0);
+  return `₹${num.toLocaleString('en-IN')}`;
 }
 
 export function discountOf(price, sale) {
@@ -17,7 +20,8 @@ export async function api(path, { method = 'GET', body, form } = {}) {
     headers['Content-Type'] = 'application/json';
     payload = JSON.stringify(body);
   }
-  const response = await fetch(path, { method, headers, body: payload });
+  const url = path.startsWith('http') ? path : `${API_BASE}${path}`;
+  const response = await fetch(url, { method, headers, body: payload });
   const text = await response.text();
   const data = text ? JSON.parse(text) : {};
   if (!response.ok) {
@@ -31,5 +35,8 @@ export async function api(path, { method = 'GET', body, form } = {}) {
 
 export function media(url) {
   if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.startsWith('/uploads')) return `${API_BASE}${url}`;
+  if (url.startsWith('uploads/')) return `${API_BASE}/${url}`;
   return url;
 }

@@ -82,7 +82,7 @@ export function presentProduct(row) {
 export async function loadCart(userId) {
   const cartId = await ensureCart(userId);
   const items = await query(
-    `SELECT ci.id, ci.quantity, ${PRODUCT_SELECT}
+    `SELECT ci.id AS cart_item_id, ci.quantity, ${PRODUCT_SELECT}
      FROM cart_items ci
      JOIN products p ON p.id = ci.product_id
      JOIN categories c ON c.id = p.category_id
@@ -92,7 +92,7 @@ export async function loadCart(userId) {
      ORDER BY ci.id DESC`,
     [cartId]
   );
-  return { cartId, items: items.map((item) => ({ ...presentProduct(item), quantity: item.quantity, cart_item_id: item.id })) };
+  return { cartId, items: items.map((item) => ({ ...presentProduct(item), quantity: item.quantity, cart_item_id: item.cart_item_id })) };
 }
 
 export async function quoteOrder({ userId, shippingMethodId, couponCode }) {

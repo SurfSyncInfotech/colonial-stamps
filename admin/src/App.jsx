@@ -1,11 +1,13 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { DeskAuth, Guard, Shell } from './kit';
-import {
-  ActivityPage, AdminsPage, AnalyticsPage, BannersPage, CategoriesPage, CmsPage, CouponsPage,
-  CustomerDetailPage, CustomersPage, DashboardPage, InventoryPage, LoginPage, NotificationsPage,
-  OrderDetailPage, OrdersPage, ProductFormPage, ProductsPage, ProfilePage, ReviewsPage,
-  SettingsPage, ShippingPage, SubcategoriesPage,
-} from './screens';
+import { DashboardPage } from './screens/Dashboard';
+import { CategoriesPage } from './screens/Categories';
+import { ProductsPage } from './screens/Products';
+import { OrdersPage, OrderDetailPage } from './screens/Orders';
+import { CustomersPage, CustomerDetailPage } from './screens/Customers';
+import { InventoryPage } from './screens/Inventory';
+import { ProfilePage } from './screens/Profile';
+import { LoginPage } from './screens/Login';
 
 export default function App() {
   return (
@@ -14,26 +16,13 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route element={<Guard><Shell /></Guard>}>
           <Route index element={<DashboardPage />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="products/new" element={<ProductFormPage />} />
-          <Route path="products/:id" element={<ProductFormPage />} />
           <Route path="categories" element={<CategoriesPage />} />
-          <Route path="subcategories" element={<SubcategoriesPage />} />
+          <Route path="products" element={<ProductsPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:id" element={<OrderDetailPage />} />
           <Route path="customers" element={<CustomersPage />} />
           <Route path="customers/:id" element={<CustomerDetailPage />} />
           <Route path="inventory" element={<InventoryPage />} />
-          <Route path="coupons" element={<CouponsPage />} />
-          <Route path="reviews" element={<ReviewsPage />} />
-          <Route path="banners" element={<BannersPage />} />
-          <Route path="shipping" element={<ShippingPage />} />
-          <Route path="cms" element={<CmsPage />} />
-          <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="admins" element={<AdminsPage />} />
-          <Route path="activity" element={<ActivityPage />} />
-          <Route path="settings" element={<SettingsPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -681,7 +681,7 @@ router.put('/orders/:id/shipping', requirePermission('orders.update'), asyncHand
   await query(
     `INSERT INTO shipping_details (order_id, courier, tracking_number, tracking_url, shipping_status)
      VALUES (?, ?, ?, ?, ?)
-     ON CONFLICT(order_id) DO UPDATE SET courier=excluded.courier, tracking_number=excluded.tracking_number, tracking_url=excluded.tracking_url, shipping_status=excluded.shipping_status`,
+     ON DUPLICATE KEY UPDATE courier = VALUES(courier), tracking_number = VALUES(tracking_number), tracking_url = VALUES(tracking_url), shipping_status = VALUES(shipping_status)`,
     [req.params.id, body.courier || null, body.tracking_number || null, body.tracking_url || null, body.shipping_status || 'label_ready']
   );
   await logActivity(req, { action: 'shipping', module: 'orders', recordRef: String(req.params.id), description: `Updated shipping for order ${req.params.id}` });
@@ -744,7 +744,7 @@ router.put('/customers/:id/status', requirePermission('customers.approve'), asyn
   const users = await query('SELECT * FROM users WHERE id = ?', [req.params.id]);
   if (!users[0]) return res.status(404).json({ message: 'Customer not found.' });
   await query(
-    `UPDATE users SET status = ?, rejection_reason = ?, approved_at = CASE WHEN ? = 'approved' THEN datetime('now') ELSE approved_at END WHERE id = ?`,
+    `UPDATE users SET status = ?, rejection_reason = ?, approved_at = CASE WHEN ? = 'approved' THEN NOW() ELSE approved_at END WHERE id = ?`,
     [body.status, body.reason || null, body.status, req.params.id]
   );
   const copy = {
@@ -765,20 +765,28 @@ router.post('/customers/:id/notes', requirePermission('customers.view'), asyncHa
 }));
 
 router.get('/inventory', requirePermission('inventory.view'), asyncHandler(async (req, res) => {
-  const { page, limit, offset } = pageParams(req.query, 20);
+  const { page, limit, offset } = pageParams(req.query, 50);
   const where = ['p.deleted_at IS NULL'];
   const params = [];
   if (req.query.q) { where.push('(p.name LIKE ? OR p.sku LIKE ?)'); const q = `%${req.query.q}%`; params.push(q, q); }
+  if (req.query.category_id) { where.push('p.category_id = ?'); params.push(req.query.category_id); }
+  if (req.query.subcategory_id) { where.push('p.subcategory_id = ?'); params.push(req.query.subcategory_id); }
   if (req.query.status === 'out') where.push('(i.stock_on_hand - i.reserved) <= 0');
   if (req.query.status === 'low') where.push('(i.stock_on_hand - i.reserved) > 0 AND (i.stock_on_hand - i.reserved) <= p.low_stock_threshold');
   if (req.query.status === 'in') where.push('(i.stock_on_hand - i.reserved) > p.low_stock_threshold');
   const whereSql = where.join(' AND ');
   const total = await query(`SELECT COUNT(*) AS n FROM inventory i JOIN products p ON p.id = i.product_id WHERE ${whereSql}`, params);
   const rows = await query(
-    `SELECT p.id, p.name, p.sku, p.low_stock_threshold, i.stock_on_hand, i.reserved, i.sold_quantity,
-      (i.stock_on_hand - i.reserved) AS available
-     FROM inventory i JOIN products p ON p.id = i.product_id
-     WHERE ${whereSql} ORDER BY available ASC LIMIT ${limit} OFFSET ${offset}`,
+    `SELECT p.id, p.name, p.sku, p.category_id, p.subcategory_id, p.price, p.sale_price, p.low_stock_threshold,
+      i.stock_on_hand, i.reserved, i.sold_quantity,
+      (i.stock_on_hand - i.reserved) AS available,
+      c.name AS category_name, sc.name AS subcategory_name,
+      (SELECT url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.is_primary DESC, pi.display_order ASC LIMIT 1) AS image_url
+     FROM inventory i
+     JOIN products p ON p.id = i.product_id
+     LEFT JOIN categories c ON c.id = p.category_id
+     LEFT JOIN subcategories sc ON sc.id = p.subcategory_id
+     WHERE ${whereSql} ORDER BY p.name ASC LIMIT ${limit} OFFSET ${offset}`,
     params
   );
   res.json({

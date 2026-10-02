@@ -1,14 +1,26 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AccountLayout, AddressesPage, OrderDetailPage, OrdersPage, ProfilePage, SettingsPage } from './pages/Account';
-import { CategoryPage, CmsPage, ShopPage, SubcategoryPage, TrackPage } from './pages/Browse';
-import { CartPage, CheckoutPage, ConfirmationPage, LoginPage, SignupPage, VerifyPage, WishlistPage } from './pages/Flow';
+import { CategoryPage, CmsPage, ContactPage, ShopPage, SubcategoryPage, TrackPage } from './pages/Browse';
+import { CartPage, CheckoutPage, ConfirmationPage, ForgotPasswordPage, LoginPage, ResetPasswordPage, SignupPage, VerifyPage, WishlistPage } from './pages/Flow';
 import HomePage from './pages/Home';
 import ProductPage from './pages/Product';
 import { AuthProvider, SiteLayout } from './shell';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <AuthProvider>
+      <ScrollToTop />
       <Routes>
         <Route element={<SiteLayout />}>
           <Route index element={<HomePage />} />
@@ -23,10 +35,13 @@ export default function App() {
           <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<SignupPage />} />
           <Route path="verify" element={<VerifyPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="reset-password" element={<ResetPasswordPage />} />
           <Route path="track" element={<TrackPage />} />
           <Route path="about" element={<Navigate to="/pages/about-us" replace />} />
-          <Route path="contact" element={<Navigate to="/pages/contact" replace />} />
-          <Route path="contacts" element={<Navigate to="/pages/contact" replace />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="contacts" element={<ContactPage />} />
+          <Route path="pages/contact" element={<ContactPage />} />
           <Route path="product" element={<Navigate to="/stamps" replace />} />
           <Route path="products" element={<Navigate to="/stamps" replace />} />
           <Route path="pages/:slug" element={<CmsPage />} />

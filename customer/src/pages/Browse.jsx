@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { api } from '../api';
+import { Phone, Mail, MapPin, Clock, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
+import { api, media } from '../api';
 import { ProductCard, State, useMeta } from '../shell';
 
 const sorts = [
@@ -76,7 +77,7 @@ function Intro({ item }) {
   const imgUrl = subFallback[item.slug] || item.image;
   return (
     <header className="page-intro">
-      {imgUrl && <img src={imgUrl} alt={item.name} />}
+      {imgUrl && <img src={media(imgUrl)} alt={item.name} />}
       <div>
         <h1>{item.name}</h1>
         <p>{item.description}</p>
@@ -218,16 +219,242 @@ function Catalog({ locked = {} }) {
   );
 }
 
+export function ContactPage() {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  useMeta('Contact Us', 'Get in touch with our team for stamp inquiries, collection details, and order assistance.');
+
+  async function submit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setSent(true);
+    }, 500);
+  }
+
+  return (
+    <div className="wrap contact-page-wrap">
+      {/* 1. Header Section */}
+      <div className="contact-hero-head">
+        <span className="contact-kicker">Get in Touch</span>
+        <h1 className="contact-main-title">Contact Our Team</h1>
+        <p className="contact-main-desc">
+          Have questions about our stamps, your order, or need help finding a specific collection? Our friendly support team is here to help.
+        </p>
+      </div>
+
+      {/* 2. Top 3 Floating Info Cards */}
+      <div className="contact-cards-grid">
+        {/* Card 1: Phone */}
+        <div className="contact-info-card">
+          <div className="contact-card-icon-wrap">
+            <Phone size={22} />
+          </div>
+          <div>
+            <h3 className="contact-card-title">+91 98493 96820</h3>
+            <p className="contact-card-text">
+              Direct customer helpline for order assistance, stamp inquiries, and quick help.
+            </p>
+          </div>
+          <a href="tel:+919849396820" className="contact-card-link">
+            <span>Call Us Now</span>
+            <ArrowRight size={14} />
+          </a>
+        </div>
+
+        {/* Card 2: Email (Featured Center Green Card) */}
+        <div className="contact-info-card featured">
+          <div className="contact-card-icon-wrap">
+            <Mail size={22} />
+          </div>
+          <div>
+            <h3 className="contact-card-title">heartsap@yahoo.in</h3>
+            <p className="contact-card-text">
+              Send us an email anytime for stamp inquiries, custom requests, or order support.
+            </p>
+          </div>
+          <a href="mailto:heartsap@yahoo.in" className="contact-card-link">
+            <span>Send An Email</span>
+            <ArrowRight size={14} />
+          </a>
+        </div>
+
+        {/* Card 3: Location */}
+        <div className="contact-info-card">
+          <div className="contact-card-icon-wrap">
+            <MapPin size={22} />
+          </div>
+          <div>
+            <h3 className="contact-card-title">Bapatla, Andhra Pradesh</h3>
+            <p className="contact-card-text">
+              10-188/5, Maruprolu Vari Palem, Bapatla, Guntur District, Andhra Pradesh - 522101, India.
+            </p>
+          </div>
+          <a href="https://maps.google.com/?q=Maruprolu+Vari+Palem,+Bapatla,+Andhra+Pradesh+522101" target="_blank" rel="noreferrer" className="contact-card-link">
+            <span>View on Map</span>
+            <ArrowRight size={14} />
+          </a>
+        </div>
+      </div>
+
+      {/* 3. Bottom 2-Column Section: Schedule & Map on Left, Contact Form on Right */}
+      <div className="contact-body-grid">
+        {/* LEFT COLUMN: Hours & Map */}
+        <div className="contact-schedule-panel">
+          <h2 className="contact-section-h2">Our Working Time</h2>
+          <p className="contact-schedule-desc">
+            Our customer support and order dispatch office operates on the following schedule:
+          </p>
+
+          <ul className="contact-hours-list">
+            <li className="contact-hours-item open">
+              <Clock size={17} />
+              <span>Monday – Friday : <strong>9:30 AM – 6:30 PM IST</strong></span>
+            </li>
+            <li className="contact-hours-item open">
+              <Clock size={17} />
+              <span>Saturday : <strong>10:00 AM – 4:00 PM IST</strong></span>
+            </li>
+            <li className="contact-hours-item closed">
+              <XCircle size={17} />
+              <span>Sunday & Public Holidays : <strong>Closed</strong></span>
+            </li>
+          </ul>
+
+          <div style={{ marginTop: 24 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <MapPin size={18} style={{ color: '#1e6b4f' }} />
+              Location :
+            </h3>
+            <div className="contact-map-frame">
+              <iframe
+                title="Office Location"
+                src="https://maps.google.com/maps?q=10-188/5,+Maruprolu+Vari+Palem,+Bapatla,+Andhra+Pradesh+522101&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Contact Form */}
+        <div className="contact-form-panel">
+          <span className="contact-form-kicker">Contact Us</span>
+          <h2 className="contact-form-title">Get In Touch !</h2>
+
+          {sent ? (
+            <div style={{ background: '#eaf6ef', border: '1px solid #a3d8b8', color: '#165c3b', padding: '24px', borderRadius: 16, textAlign: 'center' }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#ffffff', color: '#1e6b4f', display: 'grid', placeItems: 'center', margin: '0 auto 12px' }}>
+                <CheckCircle2 size={26} />
+              </div>
+              <h3 style={{ fontSize: 20, marginBottom: 6 }}>Thank You!</h3>
+              <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.5 }}>
+                Your message has been received successfully! Our team will reply to your registered email shortly.
+              </p>
+              <button
+                type="button"
+                className="btn light"
+                style={{ marginTop: 18, borderColor: '#1e6b4f', color: '#1e6b4f' }}
+                onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', message: '' }); }}
+              >
+                Send Another Message
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <label className="field" style={{ margin: 0 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 600, color: '#3d3832', marginBottom: 6, display: 'block' }}>Email *</span>
+                <input
+                  type="email"
+                  className="contact-input-styled"
+                  placeholder="Enter email address"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
+                />
+              </label>
+
+              <label className="field" style={{ margin: 0 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 600, color: '#3d3832', marginBottom: 6, display: 'block' }}>Name *</span>
+                <input
+                  type="text"
+                  className="contact-input-styled"
+                  placeholder="Enter full name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+              </label>
+
+              <label className="field" style={{ margin: 0 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 600, color: '#3d3832', marginBottom: 6, display: 'block' }}>Phone / Subject (Optional)</span>
+                <input
+                  type="text"
+                  className="contact-input-styled"
+                  placeholder="e.g. Specimen Inquiry or Want-List"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+              </label>
+
+              <label className="field" style={{ margin: 0 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 600, color: '#3d3832', marginBottom: 6, display: 'block' }}>Message *</span>
+                <textarea
+                  rows={4}
+                  className="contact-input-styled"
+                  placeholder="Write your message here..."
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  required
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="btn"
+                disabled={loading}
+                style={{
+                  marginTop: 6,
+                  height: 48,
+                  fontSize: 15,
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  background: '#1e6b4f',
+                  borderColor: '#1e6b4f',
+                  color: '#ffffff'
+                }}
+              >
+                {loading ? 'Submitting Note...' : 'Submit Note →'}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function CmsPage() {
   const { slug } = useParams();
   const [page, setPage] = useState(null);
   const [error, setError] = useState('');
-  const [sent, setSent] = useState(false);
-  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
 
   useEffect(() => {
     api(`/api/cms/${slug}`).then((res) => setPage(res.page)).catch((err) => setError(err.message));
   }, [slug]);
+
+  if (slug === 'contact') {
+    return <ContactPage />;
+  }
 
   const title = page?.title.replace(/\bFolio\b/gi, 'Stamps from everywhere');
   const content = page?.content
@@ -240,64 +467,12 @@ export function CmsPage() {
   if (error) return <div className="wrap"><State error /></div>;
   if (!page) return <div className="wrap"><State loading /></div>;
 
-  const isContact = slug === 'contact';
   const isAbout = slug === 'about-us';
 
   return (
     <div className="wrap" style={{ padding: '28px 0 54px', maxWidth: 820 }}>
-      <h1 style={{ fontSize: 44, marginBottom: 12 }}>{isContact ? 'Contact us' : title}</h1>
+      <h1 style={{ fontSize: 44, marginBottom: 12 }}>{title}</h1>
       {content.split('\n').filter(Boolean).map((para) => <p key={para} style={{ marginTop: 14, fontSize: 16, lineHeight: 1.6 }}>{para}</p>)}
-
-      {isContact && (
-        <div style={{ marginTop: 32 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, margin: '24px 0 32px' }}>
-            <div style={{ background: '#f8faf9', border: '1px solid var(--line)', padding: 18, borderRadius: 14 }}>
-              <strong style={{ display: 'block', color: 'var(--ink)', fontSize: 15, marginBottom: 4 }}>Email Inquiries</strong>
-              <span style={{ fontSize: 13, color: 'var(--muted)' }}>desk@stampsfromeverywhere.test</span>
-            </div>
-            <div style={{ background: '#f8faf9', border: '1px solid var(--line)', padding: 18, borderRadius: 14 }}>
-              <strong style={{ display: 'block', color: 'var(--ink)', fontSize: 15, marginBottom: 4 }}>Phone Desk</strong>
-              <span style={{ fontSize: 13, color: 'var(--muted)' }}>+91 98450 11122</span>
-            </div>
-            <div style={{ background: '#f8faf9', border: '1px solid var(--line)', padding: 18, borderRadius: 14 }}>
-              <strong style={{ display: 'block', color: 'var(--ink)', fontSize: 15, marginBottom: 4 }}>Appointment Desk</strong>
-              <span style={{ fontSize: 13, color: 'var(--muted)' }}>Bengaluru, Karnataka, India</span>
-            </div>
-          </div>
-
-          <div style={{ background: '#ffffff', border: '1px solid var(--line)', borderRadius: 20, padding: 28, boxShadow: 'var(--shadow)' }}>
-            <h2 style={{ fontSize: 24, marginBottom: 8 }}>Send our desk a note</h2>
-            <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 20 }}>Have questions about a stamp series, order tracking, or philatelic authentication? Reach out below.</p>
-            {sent ? (
-              <div style={{ background: '#edf7f2', color: '#1e6b4f', padding: '16px 20px', borderRadius: 12, fontWeight: 500 }}>
-                ✓ Thank you! Your message has been sent to our desk. We will get back to you shortly.
-              </div>
-            ) : (
-              <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
-                  <label className="field">
-                    <span>Your Name</span>
-                    <input required value={contactForm.name} onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })} placeholder="Meera Iyer" />
-                  </label>
-                  <label className="field">
-                    <span>Email Address</span>
-                    <input required type="email" value={contactForm.email} onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })} placeholder="meera@example.com" />
-                  </label>
-                </div>
-                <label className="field">
-                  <span>Subject</span>
-                  <input required value={contactForm.subject} onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })} placeholder="Inquiry about Indian Stamps" />
-                </label>
-                <label className="field">
-                  <span>Message</span>
-                  <textarea required rows={4} value={contactForm.message} onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })} placeholder="Write your inquiry or question here..." style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid var(--line)' }} />
-                </label>
-                <button type="submit" className="btn" style={{ alignSelf: 'flex-start', marginTop: 6 }}>Send message →</button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
 
       {isAbout && (
         <div style={{ marginTop: 36, display: 'flex', gap: 16, flexWrap: 'wrap' }}>

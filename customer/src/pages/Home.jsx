@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
 import { ProductCard, Stars, State, useAuth, useMeta } from '../shell';
@@ -65,8 +65,20 @@ export default function HomePage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [recent, setRecent] = useState([]);
-  const [email, setEmail] = useState('');
-  const [news, setNews] = useState('');
+  const carouselRef = useRef(null);
+  const reviewCarouselRef = useRef(null);
+
+  function scrollCarousel(dir) {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: 240 * dir, behavior: 'smooth' });
+    }
+  }
+
+  function scrollReviewCarousel(dir) {
+    if (reviewCarouselRef.current) {
+      reviewCarouselRef.current.scrollBy({ left: 360 * dir, behavior: 'smooth' });
+    }
+  }
   useMeta('Stamps from everywhere', 'Independence issues, princely states, and wildlife definitives from around the world.');
 
   function load() {
@@ -84,7 +96,6 @@ export default function HomePage() {
   if (error) return <div className="wrap"><State error onRetry={load} /></div>;
 
   const hero = data.banners.find((b) => b.placement === 'hero') || data.banners[0];
-  const promos = data.banners.filter((b) => b.placement !== 'hero').slice(0, 3);
   const tones = ['sage', 'cream', 'blue'];
   const floats = [...data.rare, ...data.featured].slice(0, 3);
 
@@ -251,100 +262,54 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Exclusive Archival Holdings Gallery from User Collection */}
-      <section className="section" style={{ margin: '36px auto 44px' }}>
-        <div className="section-head">
-          <div>
-            <span style={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#c45525', fontWeight: 700 }}>Archival Stamp Desk</span>
-            <h2 style={{ fontSize: 32, marginTop: 4 }}>Authentic Philatelic Exhibit Sheets & Covers</h2>
-          </div>
-          <Link to="/stamps">View All Products →</Link>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
-          <div className="excel-cat-card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="card-thumb-wrap" style={{ height: 180, background: '#fcfbf7' }}>
-              <img src="/stamps/princely_states_sheet1.png" alt="Indian Princely States Exhibit Sheet I" style={{ height: '100%', objectFit: 'contain' }} />
-            </div>
-            <h3>Indian Princely States Sheet I</h3>
-            <p className="card-desc">Featuring Jaipur State Service, Gwalior Service, Hyderabad Charminar, Bahawalpur, and Indore.</p>
-            <div className="card-footer" style={{ marginTop: 'auto', paddingTop: 12 }}>
-              <Link to="/product/indian-princely-states-archival-sheet-1">View Exhibit Piece →</Link>
-            </div>
-          </div>
 
-          <div className="excel-cat-card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="card-thumb-wrap" style={{ height: 180, background: '#fcfbf7' }}>
-              <img src="/stamps/princely_states_sheet2.png" alt="Indian Princely States Exhibit Sheet II" style={{ height: '100%', objectFit: 'contain' }} />
-            </div>
-            <h3>Indian Princely States Sheet II</h3>
-            <p className="card-desc">Featuring Cochin Anchal, Gwalior Service, Duttia State, Hyderabad Victory, and Travancore green.</p>
-            <div className="card-footer" style={{ marginTop: 'auto', paddingTop: 12 }}>
-              <Link to="/product/indian-princely-states-archival-sheet-2">View Exhibit Piece →</Link>
-            </div>
-          </div>
-
-          <div className="excel-cat-card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="card-thumb-wrap" style={{ height: 180, background: '#fcfbf7' }}>
-              <img src="/stamps/fdc_siberian_crane_1983.png" alt="1983 Siberian Crane First Day Cover" style={{ height: '100%', objectFit: 'contain' }} />
-            </div>
-            <h3>1983 Siberian Crane First Day Cover</h3>
-            <p className="card-desc">International Crane Workshop Bharatpur FDC with official Calcutta postmark and Siberian Crane stamp.</p>
-            <div className="card-footer" style={{ marginTop: 'auto', paddingTop: 12 }}>
-              <Link to="/product/1983-siberian-crane-bharatpur-workshop-first-day-cover">View Cover →</Link>
-            </div>
-          </div>
-
-          <div className="excel-cat-card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="card-thumb-wrap" style={{ height: 180, background: '#fcfbf7' }}>
-              <img src="/stamps/birds_monal_sheet.png" alt="1975 Monal Pheasant Mint Sheet" style={{ height: '100%', objectFit: 'contain' }} />
-            </div>
-            <h3>1975 Monal Pheasant Mint Sheet</h3>
-            <p className="card-desc">Full mint sheet of 200 (Rs 2) Himalayan Monal Pheasant definitive stamps with complete margins.</p>
-            <div className="card-footer" style={{ marginTop: 'auto', paddingTop: 12 }}>
-              <Link to="/product/1975-monal-pheasant-complete-mint-sheet">View Mint Sheet →</Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <section className="section">
         <div className="section-head"><h2>Top picks for you</h2><Link to="/stamps?featured=1">See all deals</Link></div>
         <div className="rail">{data.featured.slice(0, 5).map((product) => <ProductCard key={product.id} product={product} />)}</div>
       </section>
 
-      <section className="section promos">
-        {promos.map((banner) => (
-          <article key={banner.id} className="promo">
-            <div>
-              <h3>{banner.title?.replace(/the rare cabinet/gi, 'Curated collection').replace(/rare cabinet/gi, 'Curated pieces')}</h3>
-              <p>{banner.subtitle?.replace(/rare cabinet/gi, 'curated album')}</p>
+
+
+      <section className="section rare carousel-section">
+        <div className="rare-info">
+          <div className="eyebrow">New Arrivals</div>
+          <h2 style={{ fontSize: 36, margin: '8px 0', lineHeight: 1.15 }}>Fresh from the Cabinet</h2>
+          <p>Newly cataloged First Day Covers, colonial singles, and princely state issues authenticated and ready for your collection.</p>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 18, flexWrap: 'wrap' }}>
+            <Link className="btn light" to="/stamps?new_arrival=1">Explore new tray</Link>
+            <div className="carousel-nav-btns">
+              <button
+                type="button"
+                className="carousel-arrow"
+                aria-label="Scroll left"
+                onClick={() => scrollCarousel(-1)}
+              >
+                ←
+              </button>
+              <button
+                type="button"
+                className="carousel-arrow"
+                aria-label="Scroll right"
+                onClick={() => scrollCarousel(1)}
+              >
+                →
+              </button>
             </div>
-            <Link className="btn" to={banner.button_url || '/stamps'}>
-              {banner.button_text?.replace(/rare stamps/gi, 'Curated stamps') || 'Browse'}
-            </Link>
-          </article>
-        ))}
-      </section>
-
-      <section className="section">
-        <div className="section-head"><h2>New arrivals</h2><Link to="/stamps?new_arrival=1">See the new tray</Link></div>
-        <div className="rail">{data.new_arrivals.slice(0, 5).map((product) => <ProductCard key={product.id} product={product} />)}</div>
-      </section>
-
-      <section className="section rare">
-        <div>
-          <div className="eyebrow">Curated Pieces</div>
-          <h2 style={{ fontSize: 36, margin: '8px 0' }}>Pieces we keep one of</h2>
-          <p>Lithographs, mourning issues, and state stamps. Stock is the number on the invoice, not a guess.</p>
-          <Link className="btn light" style={{ marginTop: 16 }} to="/stamps?rare=1">View collection</Link>
+          </div>
         </div>
-        <div className="rail">{data.rare.slice(0, 4).map((product) => <ProductCard key={product.id} product={product} />)}</div>
+        <div className="carousel-track-wrapper">
+          <div className="carousel-track" ref={carouselRef}>
+            {(data.new_arrivals?.length ? data.new_arrivals : data.rare).map((product) => (
+              <div key={product.id} className="carousel-slide">
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <section className="section">
-        <div className="section-head"><h2>Curated highlights</h2><Link to="/stamps">See all</Link></div>
-        <div className="rail">{data.best_sellers.slice(0, 5).map((product) => <ProductCard key={product.id} product={product} />)}</div>
-      </section>
+
 
       {recent.length > 0 && (
         <section className="section">
@@ -357,97 +322,95 @@ export default function HomePage() {
         const allReviews = [
           ...(data?.reviews || []),
           ...defaultPhilatelistReviews.filter((dr) => !(data?.reviews || []).some((r) => r.full_name === dr.full_name))
-        ].slice(0, 6);
+        ];
         return (
-          <section className="section" style={{ margin: '48px auto 36px' }}>
-            <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 32px' }}>
-              <span style={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#c45525', fontWeight: 700 }}>
-                Collector Experiences & Notes
-              </span>
-              <h2 style={{ fontSize: 34, marginTop: 6, lineHeight: 1.15 }}>Loved by Collectors Worldwide</h2>
-              <p style={{ marginTop: 8, color: 'var(--muted)', fontSize: 15 }}>
-                Feedback from philatelic society members, historians, and passionate album keepers across India & overseas.
-              </p>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginTop: 12, background: '#f5faf3', padding: '6px 18px', borderRadius: 999, border: '1px solid #d5e7e4' }}>
-                <Stars value={5.0} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
-                  5.0 Rating · 240+ Verified Philatelic Deliveries
-                </span>
+          <section className="section reviews-section-wrap" style={{ margin: '54px auto 40px' }}>
+            <div className="reviews-hero-head">
+              <div className="reviews-hero-content">
+                <div className="reviews-kicker">
+                  <span className="reviews-kicker-dot" />
+                  COLLECTOR EXPERIENCES & PROVENANCE
+                </div>
+                <h2 className="reviews-main-title">Loved by Collectors Worldwide</h2>
+                <p className="reviews-lead">
+                  Authentic dispatches trusted by philatelic society fellows, historians, and archival album keepers across India & overseas.
+                </p>
+
+              </div>
+
+              <div className="reviews-nav-box">
+                <button
+                  type="button"
+                  className="reviews-nav-btn"
+                  aria-label="Previous reviews"
+                  onClick={() => scrollReviewCarousel(-1)}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button
+                  type="button"
+                  className="reviews-nav-btn"
+                  aria-label="Next reviews"
+                  onClick={() => scrollReviewCarousel(1)}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
-              {allReviews.map((review) => (
-                <article key={review.id} style={{
-                  background: '#ffffff',
-                  border: '1px solid var(--line)',
-                  borderRadius: 18,
-                  padding: '22px 20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  boxShadow: '0 4px 16px rgba(28, 41, 36, 0.04)',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                }}>
-                  <header style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                    <div style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: '50%',
-                      background: 'var(--sage)',
-                      color: 'var(--text)',
-                      fontWeight: 700,
-                      fontSize: 16,
-                      display: 'grid',
-                      placeItems: 'center',
-                      flexShrink: 0
-                    }}>
-                      {review.full_name?.slice(0, 1) || 'C'}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                        <strong style={{ fontSize: 15, color: 'var(--ink)' }}>{review.full_name}</strong>
-                        <span style={{ fontSize: 11, color: '#1e6b4f', fontWeight: 600, background: '#eaf6f0', padding: '2px 8px', borderRadius: 999 }}>Verified</span>
+            <div className="carousel-track-wrapper">
+              <div className="carousel-track reviews-track" ref={reviewCarouselRef}>
+                {allReviews.map((review, idx) => {
+                  const avatarLetter = review.full_name?.slice(0, 1) || 'C';
+                  const avatarTones = ['#eaf3ed', '#fef3ec', '#eff3fc', '#fdf7e6'];
+                  const avatarTextTones = ['#1e6b4f', '#c45525', '#2554a6', '#9c680c'];
+                  const toneIdx = idx % avatarTones.length;
+                  return (
+                    <article key={review.id} className="review-carousel-card">
+                      <div className="review-card-top">
+                        <div
+                          className="review-avatar-wrap"
+                          style={{
+                            backgroundColor: avatarTones[toneIdx],
+                            color: avatarTextTones[toneIdx]
+                          }}
+                        >
+                          {avatarLetter}
+                        </div>
+                        <div className="review-author-meta">
+                          <div className="review-author-name-row">
+                            <strong className="review-author-name">{review.full_name}</strong>
+                            <span className="review-verified-tag">✓ Verified</span>
+                          </div>
+                          {review.location && (
+                            <div className="review-location">
+                              <span>🏛️</span> {review.location}
+                            </div>
+                          )}
+                          <div className="review-card-stars">
+                            {'★'.repeat(review.rating || 5)}
+                          </div>
+                        </div>
                       </div>
-                      {review.location && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{review.location}</div>}
-                      <div style={{ marginTop: 4 }}>
-                        <Stars value={review.rating || 5} />
+
+                      <blockquote className="review-quote-body">
+                        “{review.body}”
+                      </blockquote>
+
+                      <div className="review-card-footer">
+                        <span className="review-stamp-tag" title={review.product_name}>
+                          <span className="stamp-icon">✉</span> {review.product_name}
+                        </span>
+                        {review.date && <span className="review-date-tag">{review.date}</span>}
                       </div>
-                    </div>
-                  </header>
-                  <p style={{ color: '#2c332e', fontSize: 14.5, lineHeight: 1.55, margin: '6px 0 16px', flex: 1 }}>
-                    “{review.body}”
-                  </p>
-                  <div style={{ borderTop: '1px solid #f0ede6', paddingTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 12, color: '#c45525', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {review.product_name}
-                    </span>
-                    {review.date && <small style={{ color: 'var(--muted)', fontSize: 11, flexShrink: 0 }}>{review.date}</small>}
-                  </div>
-                </article>
-              ))}
+                    </article>
+                  );
+                })}
+              </div>
             </div>
           </section>
         );
       })()}
-
-      <section className="newsletter">
-        <div>
-          <h2 style={{ fontSize: 32 }}>Stay with the desk</h2>
-          <p>New cabinet notes, not a weekly shout.</p>
-        </div>
-        <form className="news-form" onSubmit={(e) => { e.preventDefault(); setNews(email.includes('@') ? 'Noted. The list is not connected to a mail provider yet.' : 'Enter an email address.'); }}>
-          <input aria-label="Email address" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <button className="btn light" type="submit">Subscribe</button>
-        </form>
-        {news && <p>{news}</p>}
-      </section>
-
-      <section className="trust">
-        <div><strong>Archival safe packaging</strong><small>Acid-free protective sleeves</small></div>
-        <div><strong>Collector authenticity</strong><small>Verified philatelic condition</small></div>
-        <div><strong>Careful dispatch</strong><small>Tracked postal handling</small></div>
-        <div><strong>Desk support</strong><small>desk@stampsfromeverywhere.test</small></div>
-      </section>
     </div>
   );
 }

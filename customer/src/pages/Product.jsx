@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { api, discountOf, inr } from '../api';
+import { api, discountOf, inr, media } from '../api';
 import { ProductCard, Stars, State, useAuth, useMeta } from '../shell';
 
 export default function ProductPage() {
@@ -24,7 +24,10 @@ export default function ProductPage() {
       localStorage.setItem('folio_viewed', JSON.stringify([res.product, ...viewed].slice(0, 8)));
     }).catch((err) => setError(err.message));
   }
-  useEffect(() => { load(); }, [slug]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    load();
+  }, [slug]);
   useMeta(data?.product?.name, data?.product?.short_description);
 
   if (error) return <div className="wrap"><State error onRetry={load} /></div>;
@@ -34,7 +37,15 @@ export default function ProductPage() {
   const current = product.images[image] || { url: product.image, alt_text: product.name };
 
   async function add(buyNow) {
-    if (!auth.user) return navigate('/login');
+    if (!auth.user) {
+      auth.requireAuth({
+        type: buyNow ? 'buy_now' : 'cart',
+        product_id: product.id,
+        quantity: qty,
+        product_slug: product.slug,
+      }, `/product/${product.slug}`);
+      return;
+    }
     try {
       await api('/api/cart/items', { method: 'POST', body: { product_id: product.id, quantity: qty } });
       auth.refreshCart();
@@ -44,7 +55,14 @@ export default function ProductPage() {
   }
 
   async function wish() {
-    if (!auth.user) return navigate('/login');
+    if (!auth.user) {
+      auth.requireAuth({
+        type: 'wishlist',
+        product_id: product.id,
+        product_slug: product.slug,
+      }, `/product/${product.slug}`);
+      return;
+    }
     try {
       if (product.wished) await api(`/api/wishlist/items/${product.id}`, { method: 'DELETE' });
       else await api('/api/wishlist/items', { method: 'POST', body: { product_id: product.id } });
@@ -54,6 +72,10 @@ export default function ProductPage() {
 
   async function sendReview(event) {
     event.preventDefault();
+    if (!auth.user) {
+      auth.requireAuth(null, `/product/${product.slug}`);
+      return;
+    }
     const form = new FormData();
     form.set('product_id', String(product.id));
     form.set('rating', String(review.rating));
@@ -89,10 +111,10 @@ export default function ProductPage() {
       </nav>
       <article className="product">
         <div className="gallery">
-          <button className="stage" onClick={() => setZoom(true)} aria-label="Zoom image"><img src={current.url} alt={current.alt_text || product.name} /></button>
+          <button className="stage" onClick={() => setZoom(true)} aria-label="Zoom image"><img src={media(current.url)} alt={current.alt_text || product.name} /></button>
           <div className="thumbs">
             {product.images.map((item, index) => (
-              <button key={item.id} className={index === image ? 'on' : ''} onClick={() => setImage(index)}><img src={item.url} alt={item.alt_text || ''} /></button>
+              <button key={item.id} className={index === image ? 'on' : ''} onClick={() => setImage(index)}><img src={media(item.url)} alt={item.alt_text || ''} /></button>
             ))}
           </div>
         </div>
@@ -100,7 +122,11 @@ export default function ProductPage() {
           <div className="kicker">{product.category_name} · {product.subcategory_name}</div>
           <h1>{product.name}</h1>
           <Stars value={product.rating} />
-          <div className="price-lg">₹</div>
+          <div className="price-lg">
+            <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{inr(product.effective_price)}</span>
+            {off > 0 && <s>{inr(product.price)}</s>}
+            {off > 0 && <span className="chip" style={{ background: '#fce8e6', color: 'var(--sale)', borderColor: 'transparent', marginLeft: 8, fontSize: 12 }}>{off}% OFF</span>}
+          </div>
           <p>{product.available <= 0 ? 'Out of stock' : product.availability === 'low_stock' ? `Only ${product.available} left in the cabinet` : `${product.available} available`}</p>
           <p style={{ margin: '12px 0' }}>{product.short_description}</p>
           <div className="meta-grid">

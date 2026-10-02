@@ -13,15 +13,17 @@ const router = Router();
 router.use(requireUser);
 
 const addressSchema = z.object({
-  full_name: z.string().trim().min(2),
-  phone: z.string().trim().regex(/^[0-9]{10,15}$/),
-  address_line: z.string().trim().min(4),
+  full_name: z.string().trim().min(2, 'Name must be at least 2 characters'),
+  phone: z.string().trim().regex(/^[0-9]{10,15}$/, 'Enter a valid mobile number'),
+  address_line: z.string().trim().min(4, 'Enter a valid address line'),
   apartment: z.string().trim().optional().nullable(),
   area: z.string().trim().optional().nullable(),
-  city: z.string().trim().min(2),
-  state: z.string().trim().min(2),
-  pincode: z.string().trim().min(4).max(12),
+  landmark: z.string().trim().optional().nullable(),
+  city: z.string().trim().min(2, 'Enter a valid city'),
+  state: z.string().trim().min(2, 'Enter a valid state'),
+  pincode: z.string().trim().min(4).max(12, 'Enter a valid PIN code'),
   country: z.string().trim().min(2).default('India'),
+  address_type: z.enum(['home', 'work', 'other']).default('home'),
   is_default: z.boolean().optional(),
 });
 
@@ -32,40 +34,84 @@ router.get('/addresses', asyncHandler(async (req, res) => {
 
 router.post('/addresses', asyncHandler(async (req, res) => {
   const body = addressSchema.parse(req.body);
-  if (body.is_default) await query('UPDATE user_addresses SET is_default = 0 WHERE user_id = ?', [req.user.id]);
   const existing = await query('SELECT COUNT(*) AS n FROM user_addresses WHERE user_id = ?', [req.user.id]);
   const isDefault = body.is_default || existing[0].n === 0 ? 1 : 0;
+  if (isDefault) {
+    await query('UPDATE user_addresses SET is_default = 0 WHERE user_id = ?', [req.user.id]);
+  }
   const result = await query(
-    `INSERT INTO user_addresses (user_id, full_name, phone, address_line, apartment, area, city, state, pincode, country, is_default)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [req.user.id, body.full_name, body.phone, body.address_line, body.apartment || null, body.area || null, body.city, body.state, body.pincode, body.country, isDefault]
+    `INSERT INTO user_addresses (user_id, full_name, phone, address_line, apartment, area, landmark, city, state, pincode, country, address_type, is_default)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      req.user.id,
+      body.full_name,
+      body.phone,
+      body.address_line,
+      body.apartment || null,
+      body.area || null,
+      body.landmark || null,
+      body.city,
+      body.state,
+      body.pincode,
+      body.country,
+      body.address_type || 'home',
+      isDefault,
+    ]
   );
-  res.status(201).json({ id: result.insertId, message: 'Address saved.' });
+  res.status(201).json({ id: result.insertId, message: 'Address saved successfully.' });
 }));
 
 router.put('/addresses/:id', asyncHandler(async (req, res) => {
   const body = addressSchema.parse(req.body);
   const rows = await query('SELECT id FROM user_addresses WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
   if (!rows[0]) return res.status(404).json({ message: 'Address not found.' });
-  if (body.is_default) await query('UPDATE user_addresses SET is_default = 0 WHERE user_id = ?', [req.user.id]);
+  if (body.is_default) {
+    await query('UPDATE user_addresses SET is_default = 0 WHERE user_id = ?', [req.user.id]);
+  }
   await query(
-    `UPDATE user_addresses SET full_name=?, phone=?, address_line=?, apartment=?, area=?, city=?, state=?, pincode=?, country=?, is_default=?
+    `UPDATE user_addresses SET full_name=?, phone=?, address_line=?, apartment=?, area=?, landmark=?, city=?, state=?, pincode=?, country=?, address_type=?, is_default=?
      WHERE id=? AND user_id=?`,
-    [body.full_name, body.phone, body.address_line, body.apartment || null, body.area || null, body.city, body.state, body.pincode, body.country, body.is_default ? 1 : 0, req.params.id, req.user.id]
+    [
+      body.full_name,
+      body.phone,
+      body.address_line,
+      body.apartment || null,
+      body.area || null,
+      body.landmark || null,
+      body.city,
+      body.state,
+      body.pincode,
+      body.country,
+      body.address_type || 'home',
+      body.is_default ? 1 : 0,
+      req.params.id,
+      req.user.id,
+    ]
   );
-  res.json({ message: 'Address updated.' });
+  res.json({ message: 'Address updated successfully.' });
 }));
 
 router.delete('/addresses/:id', asyncHandler(async (req, res) => {
+  const target = await query('SELECT is_default FROM user_addresses WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+  if (!target[0]) return res.status(404).json({ message: 'Address not found.' });
+
   await query('DELETE FROM user_addresses WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-  res.json({ message: 'Address removed.' });
+
+  // If deleted address was default, auto-set the most recent remaining address as default
+  if (target[0].is_default) {
+    const remaining = await query('SELECT id FROM user_addresses WHERE user_id = ? ORDER BY id DESC LIMIT 1', [req.user.id]);
+    if (remaining[0]) {
+      await query('UPDATE user_addresses SET is_default = 1 WHERE id = ?', [remaining[0].id]);
+    }
+  }
+  res.json({ message: 'Address removed successfully.' });
 }));
 
 router.post('/addresses/:id/default', asyncHandler(async (req, res) => {
   await query('UPDATE user_addresses SET is_default = 0 WHERE user_id = ?', [req.user.id]);
   const result = await query('UPDATE user_addresses SET is_default = 1 WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
   if (!result.affectedRows) return res.status(404).json({ message: 'Address not found.' });
-  res.json({ message: 'Default address updated.' });
+  res.json({ message: 'Default address updated successfully.' });
 }));
 
 router.get('/cart', asyncHandler(async (req, res) => {
@@ -104,22 +150,22 @@ router.put('/cart/items/:id', asyncHandler(async (req, res) => {
      JOIN carts c ON c.id = ci.cart_id
      JOIN products p ON p.id = ci.product_id
      JOIN inventory i ON i.product_id = p.id
-     WHERE ci.id = ? AND c.user_id = ?`,
-    [req.params.id, req.user.id]
+     WHERE (ci.id = ? OR ci.product_id = ?) AND c.user_id = ?`,
+    [req.params.id, req.params.id, req.user.id]
   );
   if (!rows[0]) return res.status(404).json({ message: 'Cart item not found.' });
   if (body.quantity > rows[0].available) {
     return res.status(409).json({ message: `Only ${rows[0].available} of ${rows[0].name} remain.` });
   }
-  await query('UPDATE cart_items SET quantity = ? WHERE id = ?', [body.quantity, req.params.id]);
+  await query('UPDATE cart_items SET quantity = ? WHERE id = ?', [body.quantity, rows[0].id]);
   res.json({ message: 'Quantity updated.', ...(await loadCart(req.user.id)) });
 }));
 
 router.delete('/cart/items/:id', asyncHandler(async (req, res) => {
   await query(
     `DELETE FROM cart_items
-     WHERE id = ? AND cart_id IN (SELECT id FROM carts WHERE user_id = ?)`,
-    [req.params.id, req.user.id]
+     WHERE (id = ? OR product_id = ?) AND cart_id IN (SELECT id FROM carts WHERE user_id = ?)`,
+    [req.params.id, req.params.id, req.user.id]
   );
   res.json({ message: 'Removed from cart.', ...(await loadCart(req.user.id)) });
 }));
@@ -503,7 +549,7 @@ router.post('/reviews', upload.array('images', 4), asyncHandler(async (req, res)
   await query(
     `INSERT INTO reviews (product_id, user_id, order_id, rating, title, body, images, status)
      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
-     ON CONFLICT(product_id, user_id) DO UPDATE SET rating = excluded.rating, title = excluded.title, body = excluded.body, images = excluded.images, status = 'pending', updated_at = datetime('now')`,
+     ON DUPLICATE KEY UPDATE rating = VALUES(rating), title = VALUES(title), body = VALUES(body), images = VALUES(images), status = 'pending', updated_at = NOW()`,
     [body.product_id, req.user.id, bought[0].id, body.rating, body.title || null, body.body, JSON.stringify(images)]
   );
   await notify({

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { api, discountOf, inr } from './api';
+import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Lock, ShieldCheck, ArrowRight, ShoppingCart, Globe, Plane, Sparkles } from 'lucide-react';
+import { api, discountOf, inr, media } from './api';
 
 const AuthContext = createContext(null);
 export function useAuth() { return useContext(AuthContext); }
@@ -10,6 +11,8 @@ export function AuthProvider({ children }) {
     try { return JSON.parse(localStorage.getItem('folio_user') || 'null'); } catch { return null; }
   });
   const [cartCount, setCartCount] = useState(0);
+  const [authPrompt, setAuthPrompt] = useState(null); // { open: boolean, message: string, redirect: string, action: object }
+  const [isLoading, setIsLoading] = useState(true);
 
   function persist(next, token) {
     if (token) localStorage.setItem('folio_token', token);
@@ -21,6 +24,42 @@ export function AuthProvider({ children }) {
     setUser(next);
   }
 
+  function logout() {
+    persist(null);
+    setCartCount(0);
+  }
+
+  function requireAuth(actionPayload, redirectUrl) {
+    if (user) return true;
+    if (actionPayload) {
+      localStorage.setItem('folio_intended_action', JSON.stringify(actionPayload));
+    }
+    setAuthPrompt({
+      open: true,
+      message: 'Please sign in or create an account to add stamps to your cart.',
+      redirect: redirectUrl || window.location.pathname,
+      action: actionPayload,
+    });
+    return false;
+  }
+
+  async function executeIntendedAction() {
+    try {
+      const raw = localStorage.getItem('folio_intended_action');
+      if (!raw) return false;
+      const intended = JSON.parse(raw);
+      localStorage.removeItem('folio_intended_action');
+      if (intended.action === 'add_to_cart' && intended.productId) {
+        await api('/api/cart/items', { method: 'POST', body: { product_id: intended.productId, quantity: intended.quantity || 1 } });
+        await refreshCart();
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
   async function refreshCart() {
     if (!localStorage.getItem('folio_token')) { setCartCount(0); return; }
     try {
@@ -29,12 +68,112 @@ export function AuthProvider({ children }) {
     } catch { setCartCount(0); }
   }
 
-  useEffect(() => { refreshCart(); }, [user?.id]);
+  // Validate session on load
+  useEffect(() => {
+    const token = localStorage.getItem('folio_token');
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+    api('/api/auth/me')
+      .then((res) => {
+        if (res.user) {
+          persist(res.user, token);
+          refreshCart();
+        }
+      })
+      .catch(() => {
+        persist(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, persist, cartCount, refreshCart, setUser: (next) => persist(next) }}>
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      persist,
+      logout,
+      requireAuth,
+      executeIntendedAction,
+      cartCount,
+      refreshCart,
+      setUser: (next) => persist(next),
+      authPrompt,
+      setAuthPrompt,
+    }}>
       {children}
+      {authPrompt?.open && (
+        <AuthPromptModal
+          message={authPrompt.message}
+          redirect={authPrompt.redirect}
+          onClose={() => setAuthPrompt(null)}
+        />
+      )}
     </AuthContext.Provider>
+  );
+}
+
+export function AuthPromptModal({ message, redirect, onClose }) {
+  const navigate = useNavigate();
+  const targetRedirect = encodeURIComponent(redirect || window.location.pathname);
+
+  return (
+    <div className="modal" role="dialog" aria-modal="true" aria-label="Sign in required" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460, textAlign: 'center', padding: '32px 24px' }}>
+        <div style={{
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          background: '#fef3ec',
+          color: '#c45525',
+          display: 'grid',
+          placeItems: 'center',
+          margin: '0 auto 16px'
+        }}>
+          <Lock size={26} />
+        </div>
+        <h3 style={{ fontFamily: 'var(--serif)', fontSize: 26, margin: '0 0 8px', color: 'var(--ink)' }}>
+          Collector Account Required
+        </h3>
+        <p style={{ color: 'var(--muted)', fontSize: 14.5, lineHeight: 1.5, margin: '0 0 24px' }}>
+          {message || 'Please sign in or create an account to reserve and order stamps from the cabinet.'}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <button
+            className="btn"
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+            onClick={() => {
+              onClose();
+              navigate(`/login?redirect=${targetRedirect}`);
+            }}
+          >
+            <span>Sign In to Continue</span>
+            <ArrowRight size={16} />
+          </button>
+          <button
+            className="btn light"
+            style={{ width: '100%', borderColor: '#1e6b4f', color: '#1e6b4f' }}
+            onClick={() => {
+              onClose();
+              navigate(`/signup?redirect=${targetRedirect}`);
+            }}
+          >
+            Create New Account
+          </button>
+          <button
+            className="btn ghost"
+            style={{ width: '100%', marginTop: 4 }}
+            onClick={onClose}
+          >
+            Continue Browsing
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -73,13 +212,20 @@ export function Stars({ value }) {
 export function ProductCard({ product }) {
   const auth = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const off = discountOf(product.price, product.sale_price);
   const [quick, setQuick] = useState(false);
   const [note, setNote] = useState('');
 
   async function wish(event) {
     event.preventDefault();
-    if (!auth.user) return navigate('/login');
+    if (!auth.user) {
+      auth.requireAuth(
+        { action: 'wishlist', productId: product.id },
+        location.pathname
+      );
+      return;
+    }
     try {
       if (product.wished) await api(`/api/wishlist/items/${product.id}`, { method: 'DELETE' });
       else await api('/api/wishlist/items', { method: 'POST', body: { product_id: product.id } });
@@ -88,12 +234,19 @@ export function ProductCard({ product }) {
   }
 
   async function add(event) {
-    event.preventDefault();
-    if (!auth.user) return navigate('/login');
+    if (event) event.preventDefault();
+    if (!auth.user) {
+      auth.requireAuth(
+        { action: 'add_to_cart', productId: product.id, quantity: 1 },
+        location.pathname
+      );
+      return;
+    }
     try {
       await api('/api/cart/items', { method: 'POST', body: { product_id: product.id, quantity: 1 } });
       auth.refreshCart();
       setNote('Added to cart');
+      if (quick) setQuick(false);
     } catch (error) { setNote(error.message); }
   }
 
@@ -101,26 +254,42 @@ export function ProductCard({ product }) {
     <article className="pcard">
       <div className="pcard-media">
         <button className="heart" aria-label="Save to wishlist" onClick={wish}><Icon d={paths.heart} size={16} /></button>
-        <Link to={`/product/${product.slug}`}><img src={product.image} alt={product.name} /></Link>
+        <Link to={`/product/${product.slug}`}><img src={media(product.image)} alt={product.name} /></Link>
         <button className="quick" onClick={() => setQuick(true)}>Quick view</button>
       </div>
       <h3><Link to={`/product/${product.slug}`}>{product.name}</Link></h3>
       <Stars value={product.rating} />
       <div className="pcard-row">
-        <div><strong>₹</strong></div>
-        <button className="cart-btn" aria-label={`Add ${product.name} to cart`} onClick={add} disabled={product.available < 1}><Icon d={paths.bag} size={16} /></button>
+        <div>
+          <strong>{inr(product.effective_price || product.price)}</strong>
+          {off > 0 && <span className="pcard-discount-tag">{off}% off</span>}
+        </div>
       </div>
-      {product.available < 1 && <small>Out of stock</small>}
-      {note && <small>{note}</small>}
+      <button
+        className="pcard-add-cart-btn"
+        type="button"
+        aria-label={`Add ${product.name} to cart`}
+        onClick={add}
+        disabled={product.available < 1}
+      >
+        <ShoppingCart size={15} />
+        <span>{product.available < 1 ? 'Out of Stock' : 'Add to Cart'}</span>
+      </button>
+      {note && <small style={{ display: 'block', marginTop: 4, color: '#1e6b4f', fontWeight: 600, textAlign: 'center', fontSize: 12 }}>{note}</small>}
       {quick && (
-        <div className="modal" role="dialog" aria-modal="true" aria-label={product.name}>
-          <div className="sheet">
-            <img src={product.image} alt="" style={{ height: 220, margin: '0 auto' }} />
+        <div className="modal" role="dialog" aria-modal="true" aria-label={product.name} onClick={() => setQuick(false)}>
+          <div className="sheet" onClick={(e) => e.stopPropagation()}>
+            <img src={media(product.image)} alt="" style={{ height: 220, margin: '0 auto', objectFit: 'contain' }} />
             <h3 style={{ fontFamily: 'var(--serif)', fontSize: 28, marginTop: 8 }}>{product.name}</h3>
             <p style={{ color: 'var(--muted)', margin: '6px 0 12px' }}>{product.short_description}</p>
-            <strong>₹</strong>
+            <div style={{ margin: '10px 0 16px' }}>
+              <strong style={{ fontSize: 22 }}>{inr(product.effective_price || product.price)}</strong>
+              {off > 0 && <span style={{ marginLeft: 8, color: '#c45525', fontWeight: 600, fontSize: 13 }}>({off}% OFF)</span>}
+            </div>
             <div className="buy-row">
-              <button className="btn" onClick={add}>Add to cart</button>
+              <button className="btn" onClick={add} disabled={product.available < 1} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <ShoppingCart size={16} /> Add to cart
+              </button>
               <Link className="btn light" to={`/product/${product.slug}`}>Full details</Link>
               <button className="btn ghost" onClick={() => setQuick(false)}>Close</button>
             </div>
@@ -177,11 +346,51 @@ export function SiteLayout() {
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
+      <div className="top-marquee-bar" role="region" aria-label="Global Announcements">
+        <div className="top-marquee-track">
+          <div className="top-marquee-content">
+            <span><Globe size={13} className="tm-icon" /> <strong>Serving Stamp Collectors in All Countries Worldwide</strong></span>
+            <span className="tm-dot">✦</span>
+            <span><Plane size={13} className="tm-icon" /> Safe Worldwide Shipping &amp; Fast Dispatch</span>
+            <span className="tm-dot">✦</span>
+            <span><Sparkles size={13} className="tm-icon" /> 100% Genuine &amp; Authentic Stamps</span>
+            <span className="tm-dot">✦</span>
+            <span><ShieldCheck size={13} className="tm-icon" /> Safe Moisture-Proof Protective Packaging</span>
+            <span className="tm-dot">✦</span>
+            <span><Globe size={13} className="tm-icon" /> <strong>Serving Stamp Collectors in All Countries Worldwide</strong></span>
+            <span className="tm-dot">✦</span>
+            <span><Plane size={13} className="tm-icon" /> Safe Worldwide Shipping &amp; Fast Dispatch</span>
+            <span className="tm-dot">✦</span>
+            <span><Sparkles size={13} className="tm-icon" /> 100% Genuine &amp; Authentic Stamps</span>
+            <span className="tm-dot">✦</span>
+            <span><ShieldCheck size={13} className="tm-icon" /> Safe Moisture-Proof Protective Packaging</span>
+            <span className="tm-dot">✦</span>
+          </div>
+          <div className="top-marquee-content" aria-hidden="true">
+            <span><Globe size={13} className="tm-icon" /> <strong>Serving Stamp Collectors in All Countries Worldwide</strong></span>
+            <span className="tm-dot">✦</span>
+            <span><Plane size={13} className="tm-icon" /> Safe Worldwide Shipping &amp; Fast Dispatch</span>
+            <span className="tm-dot">✦</span>
+            <span><Sparkles size={13} className="tm-icon" /> 100% Genuine &amp; Authentic Stamps</span>
+            <span className="tm-dot">✦</span>
+            <span><ShieldCheck size={13} className="tm-icon" /> Safe Moisture-Proof Protective Packaging</span>
+            <span className="tm-dot">✦</span>
+            <span><Globe size={13} className="tm-icon" /> <strong>Serving Stamp Collectors in All Countries Worldwide</strong></span>
+            <span className="tm-dot">✦</span>
+            <span><Plane size={13} className="tm-icon" /> Safe Worldwide Shipping &amp; Fast Dispatch</span>
+            <span className="tm-dot">✦</span>
+            <span><Sparkles size={13} className="tm-icon" /> 100% Genuine &amp; Authentic Stamps</span>
+            <span className="tm-dot">✦</span>
+            <span><ShieldCheck size={13} className="tm-icon" /> Safe Moisture-Proof Protective Packaging</span>
+            <span className="tm-dot">✦</span>
+          </div>
+        </div>
+      </div>
       <header className="mast">
         <div className="wrap mast-row">
           <button className="menu-btn" aria-label="Open menu" onClick={() => setDrawer(true)}><Icon d={paths.menu} /></button>
           <Link to="/" className="logo" aria-label="Stamps from everywhere home">
-            <span className="logo-mark"><Icon d="M7 4h10v16H7zM9 8h6M9 12h6" size={18} /></span>
+            <img src="/stamps/logo.svg" alt="Stamps logo" style={{ width: 46, height: 46, objectFit: 'contain', borderRadius: 6, flexShrink: 0 }} />
             <span><strong>Stamps</strong><small>FROM EVERYWHERE</small></span>
           </Link>
           <form className={`search ${searchOpen ? 'open' : ''}`} onSubmit={goSearch} role="search">
@@ -195,7 +404,7 @@ export function SiteLayout() {
                 {suggest.products.length === 0 && <p style={{ padding: 8 }}>No matches yet.</p>}
                 {suggest.products.map((item) => (
                   <Link key={item.slug} to={`/product/${item.slug}`} onClick={() => setSuggest(null)}>
-                    <img src={item.image} alt="" /><span>{item.name}<br /><small>{item.catalogue_number || item.sku}</small></span>
+                    <img src={media(item.image)} alt="" /><span>{item.name}<br /><small>{item.catalogue_number || item.sku}</small></span>
                   </Link>
                 ))}
               </div>
@@ -205,15 +414,15 @@ export function SiteLayout() {
             <button className="mobile-search" aria-label="Search" onClick={() => setSearchOpen((v) => !v)}><Icon d={paths.search} /></button>
             <Link to={auth.user ? '/account' : '/login'}><Icon d={paths.user} /><span>Account</span></Link>
             <Link to="/wishlist"><Icon d={paths.heart} /><span>Wishlist</span></Link>
-            <Link className="keep" to="/cart"><Icon d={paths.bag} /><span>Cart</span>{auth.cartCount > 0 && <em className="badge">{auth.cartCount}</em>}</Link>
+            <Link className="keep" to="/cart"><ShoppingCart size={20} /><span>Cart</span>{auth.cartCount > 0 && <em className="badge">{auth.cartCount}</em>}</Link>
           </div>
         </div>
       </header>
       <div className="navrow">
         <div className="wrap nav-inner">
-          <button className="cat-btn" aria-expanded={openCats} onClick={() => setOpenCats((v) => !v)}>
+          <button className={`cat-btn ${openCats ? 'is-open' : ''}`} aria-expanded={openCats} aria-controls="category-panel" onClick={() => setOpenCats((v) => !v)}>
             <span>All categories</span>
-            <span style={{ fontSize: 11 }}>{openCats ? '▲' : '▼'}</span>
+            <svg className="cat-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
           </button>
           <nav className="nav-links" aria-label="Primary">
             <NavLink to="/" end>Home</NavLink>
@@ -222,57 +431,41 @@ export function SiteLayout() {
             <NavLink to="/pages/contact">Contact us</NavLink>
           </nav>
         </div>
-        {openCats && (
-          <div className="mega" onClick={() => setOpenCats(false)}>
-            <div className="wrap mega-grid" onClick={(e) => e.stopPropagation()}>
-              {categories.map((category) => {
-                const isIndia = category.slug === 'indian-stamps';
-                return (
-                  <div key={category.id} className="mega-col" style={{ borderLeft: isIndia ? '3px solid #c45525' : '3px solid #1e6b4f', paddingLeft: 18 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                      <span style={{
-                        fontSize: 11,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.12em',
-                        fontWeight: 700,
-                        color: isIndia ? '#c45525' : '#1e6b4f',
-                        background: isIndia ? '#fef3ec' : '#edf7f2',
-                        padding: '3px 8px',
-                        borderRadius: 4
-                      }}>
-                        {isIndia ? 'We focus on stamps from India' : 'WORLD STAMPS'}
-                      </span>
-                    </div>
-                    <Link className="cat-link" to={`/stamps/${category.slug}`} onClick={() => setOpenCats(false)} style={{ display: 'block', fontSize: 20, fontWeight: 600 }}>
-                      {category.name}
-                    </Link>
-                    <p style={{ color: 'var(--muted)', fontSize: 13, margin: '4px 0 14px' }}>{category.description}</p>
-                    <ul className="mega-subs" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                      {category.subcategories?.map((sub) => (
-                        <li key={sub.id} style={{ margin: '6px 0' }}>
-                          <Link
-                            to={`/stamps/${category.slug}/${sub.slug}`}
-                            onClick={() => setOpenCats(false)}
-                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14, color: 'var(--text)', padding: '4px 0' }}
-                          >
-                            <span style={{ fontWeight: 500 }}>• {sub.name}</span>
-                            <small style={{ color: 'var(--muted)' }}>{sub.product_count} stamps</small>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
+        <div className={`mega ${openCats ? 'is-open' : ''}`} id="category-panel" aria-hidden={!openCats} onClick={() => setOpenCats(false)}>
+          <div className="wrap mega-grid" onClick={(e) => e.stopPropagation()}>
+            {categories.map((category, index) => {
+              const isIndia = category.slug === 'indian-stamps';
+              return (
+                <div key={category.id} className={`mega-col ${isIndia ? 'is-india' : 'is-world'}`} style={{ animationDelay: `${80 + index * 70}ms` }}>
+                  <span className="mega-kicker">{isIndia ? 'We focus on stamps from India' : 'World stamps'}</span>
+                  <Link className="cat-link" to={`/stamps/${category.slug}`} onClick={() => setOpenCats(false)}>
+                    {category.name}
+                  </Link>
+                  <p className="mega-desc">{category.description}</p>
+                  <ul className="mega-subs">
+                    {category.subcategories?.map((sub, subIndex) => (
+                      <li key={sub.id} style={{ animationDelay: `${140 + index * 70 + subIndex * 45}ms` }}>
+                        <Link to={`/stamps/${category.slug}/${sub.slug}`} onClick={() => setOpenCats(false)}>
+                          <span>{sub.name}</span>
+                          <small>{sub.product_count} stamps</small>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
-        )}
+        </div>
       </div>
       {drawer && (
         <div className="drawer" onClick={() => setDrawer(false)}>
           <aside onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <strong style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>Cabinet Menu</strong>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <img src="/stamps/logo.svg" alt="Stamps" style={{ width: 32, height: 32, objectFit: 'contain', borderRadius: 4 }} />
+                <strong style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>Cabinet Menu</strong>
+              </div>
               <button className="icon-btn" onClick={() => setDrawer(false)} style={{ fontSize: 16, cursor: 'pointer' }}>✕</button>
             </div>
             <Link to="/" onClick={() => setDrawer(false)}>Home</Link>
@@ -308,7 +501,7 @@ export function SiteLayout() {
         <div className="wrap footer-grid">
           <div>
             <Link to="/" className="logo">
-              <span className="logo-mark"><Icon d="M7 4h10v16H7zM9 8h6M9 12h6" size={18} /></span>
+              <img src="/stamps/logo.svg" alt="Stamps logo" style={{ width: 42, height: 42, objectFit: 'contain', borderRadius: 6, flexShrink: 0 }} />
               <span><strong>Stamps</strong><small>FROM EVERYWHERE</small></span>
             </Link>
             <p style={{ marginTop: 10 }}>Specialized philately cabinet focusing on rare Indian issues, Princely States, Gandhi memorials, and classic world postage.</p>
@@ -333,9 +526,9 @@ export function SiteLayout() {
           </div>
           <div>
             <h3>Desk</h3>
-            <p>desk@stampsfromeverywhere.test</p>
-            <p>Weekdays, 10 to 6 IST</p>
-            <p>Bengaluru, by appointment</p>
+            <p>heartsap@yahoo.in</p>
+            <p>+91 98493 96820</p>
+            <p>Bapatla, Andhra Pradesh</p>
           </div>
         </div>
         <div className="wrap legal">

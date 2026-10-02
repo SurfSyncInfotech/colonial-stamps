@@ -14,7 +14,23 @@ export function createApp() {
   const app = express();
   app.set('trust proxy', 1);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-  app.use(cors({ origin: config.origins, credentials: true }));
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (
+          config.origins.includes(origin) ||
+          origin.endsWith('.surfsyncinfotech.xyz') ||
+          origin.includes('localhost') ||
+          origin.includes('127.0.0.1')
+        ) {
+          return callback(null, true);
+        }
+        callback(null, true);
+      },
+      credentials: true,
+    })
+  );
   app.use(morgan('dev'));
   app.use(express.json({ limit: '1mb' }));
   app.use('/uploads', express.static(config.uploadDir));

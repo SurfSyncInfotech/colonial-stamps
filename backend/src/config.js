@@ -19,7 +19,7 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-me',
   jwtExpires: process.env.JWT_EXPIRES_IN || '7d',
   adminJwtExpires: process.env.ADMIN_JWT_EXPIRES_IN || '12h',
-  origins: (process.env.CLIENT_ORIGINS || 'http://localhost:5173,http://localhost:5174')
+  origins: (process.env.CORS_ORIGINS || process.env.CLIENT_ORIGINS || 'http://localhost:5173,http://localhost:5174,https://stamp.surfsyncinfotech.xyz,https://colonialstamps.surfsyncinfotech.xyz,https://colonialstampsadmin.surfsyncinfotech.xyz')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),

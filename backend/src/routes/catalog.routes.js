@@ -225,8 +225,8 @@ router.get('/products/:slug', optionalUser, asyncHandler(async (req, res) => {
   await query('UPDATE products SET view_count = view_count + 1 WHERE id = ?', [product.id]);
   if (req.user) {
     await query(
-      `INSERT INTO recently_viewed (user_id, product_id, viewed_at) VALUES (?, ?, datetime('now'))
-       ON CONFLICT(user_id, product_id) DO UPDATE SET viewed_at = datetime('now')`,
+      `INSERT INTO recently_viewed (user_id, product_id, viewed_at) VALUES (?, ?, NOW())
+       ON DUPLICATE KEY UPDATE viewed_at = NOW()`,
       [req.user.id, product.id]
     );
   }
